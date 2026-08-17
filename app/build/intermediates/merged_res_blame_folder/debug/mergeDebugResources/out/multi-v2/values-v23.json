@@ -1,0 +1,19 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.uddoktahisab.app-mergeDebugResources-69:/values-v23/values-v23.xml",
+            "map": [
+                {
+                    "source": "C:\\Users\\V2\\.gradle\\caches\\8.9\\transforms\\fe8b07e7a2ef72200d9b23f02de23c60\\transformed\\work-runtime-2.10.0\\res\\values-v23\\values-v23.xml",
+                    "from": {
+                        "startLines": "2,3",
+                        "startColumns": "4,4",
+                        "startOffsets": "55,121",
+                        "endColumns": "65,62",
+                        "endOffsets": "116,179"
+                    }
+                }
+            ]
+        }
+    ]
+}
