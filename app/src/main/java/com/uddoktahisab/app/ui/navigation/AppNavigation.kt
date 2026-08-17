@@ -17,13 +17,9 @@ fun AppNavigation(vm: AppViewModel = hiltViewModel()) {
     Box(Modifier.fillMaxSize()) {
         when {
             !s.loggedIn -> LoginScreen(s.error, vm::login, vm::clearError)
-            s.data?.user?.profileComplete != true -> ProfileScreen(
-                s.data?.user,
-                vm::completeProfile,
-                true,
-                vm::logout
+            s.data == null || s.data!!.user.profileComplete != true -> ProfileScreen(
+                s.data?.user, vm::completeProfile, true, vm::logout
             )
-
             else -> MainShell(s.data!!, vm)
         }
         if (s.offline && s.loggedIn && !s.loading) {
