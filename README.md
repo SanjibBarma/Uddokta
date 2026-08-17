@@ -73,7 +73,7 @@ Deploy করে /exec URL সংগ্রহ করুন।
 
 text
 
-https://script.google.com/macros/s/AKfycbxGobcCIqPwoPArb97gJ-48Q-Fw5KJ4cXWem4yx7USX-w60mPhLcscqTttEzxoUpNDX/exec
+https://script.google.com/macros/s/AKfycby93YHs9yoQezDbH0Q6LJb3ZOgbKBKVhYsv1gzsGYXwqi96nFhXYyWWWqQqppW5aWM8/exec
 URL পরিবর্তন করতে
 build.gradle.kts
 :
@@ -137,8 +137,8 @@ USERS sheet-এর দ্বিতীয় row:
 text
 
 A2 = ADMIN-001
-B2 = test
-C2 = test
+B2 = admin
+C2 = admin
 D2 = SUPER_ADMIN
 E2:J2 = খালি
 K2 = FALSE

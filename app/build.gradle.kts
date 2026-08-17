@@ -16,7 +16,7 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0.0"
-        buildConfigField("String", "API_URL", "\"https://script.google.com/macros/s/AKfycbxGobcCIqPwoPArb97gJ-48Q-Fw5KJ4cXWem4yx7USX-w60mPhLcscqTttEzxoUpNDX/exec\"")
+        buildConfigField("String", "API_URL", "\"https://script.google.com/macros/s/AKfycby93YHs9yoQezDbH0Q6LJb3ZOgbKBKVhYsv1gzsGYXwqi96nFhXYyWWWqQqppW5aWM8/exec\"")
     }
     buildFeatures { compose = true; buildConfig = true }
     packaging { resources.excludes += "/META-INF/{AL2.0,LGPL2.1}" }

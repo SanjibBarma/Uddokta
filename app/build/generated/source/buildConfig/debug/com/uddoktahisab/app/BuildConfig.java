@@ -10,5 +10,5 @@ public final class BuildConfig {
   public static final int VERSION_CODE = 1;
   public static final String VERSION_NAME = "1.0.0";
   // Field from default config.
-  public static final String API_URL = "https://script.google.com/macros/s/AKfycbxGobcCIqPwoPArb97gJ-48Q-Fw5KJ4cXWem4yx7USX-w60mPhLcscqTttEzxoUpNDX/exec";
+  public static final String API_URL = "https://script.google.com/macros/s/AKfycby93YHs9yoQezDbH0Q6LJb3ZOgbKBKVhYsv1gzsGYXwqi96nFhXYyWWWqQqppW5aWM8/exec";
 }
