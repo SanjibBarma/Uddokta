@@ -45,7 +45,7 @@ fun BrandMark(compact: Boolean = false) {
         }
         Column {
             Text(
-                "উদ্যোক্তা হিসাব",
+                "উদ্যোক্তা",
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = if (compact) 20.sp else 27.sp
             ); if (!compact) Text(
@@ -77,7 +77,7 @@ fun MetricCard(label: String, value: String, modifier: Modifier = Modifier) {
         shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Column(Modifier.padding(18.dp)) {
+        Column(Modifier.fillMaxWidth().padding(18.dp).heightIn(min = 88.dp)) {
             Text(
                 label,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,

@@ -667,7 +667,7 @@ public final class DaggerUddoktaApp_HiltComponents_SingletonC {
           return (T) AppModule_GsonFactory.gson();
 
           case 4: // com.uddoktahisab.app.data.local.SessionManager 
-          return (T) new SessionManager();
+          return (T) new SessionManager(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
 
           case 5: // com.uddoktahisab.app.data.local.LocalStore 
           return (T) new LocalStore(singletonCImpl.localDao(), singletonCImpl.gsonProvider.get());

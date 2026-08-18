@@ -19,6 +19,8 @@ function doPost(e){
   try {
     const req=JSON.parse((e.postData&&e.postData.contents)||'{}');
     if(!req.action) throw new Error('Action is required');
+    // Read-only operations (bootstrap) এর জন্য ScriptLock skip করি — cold start অনেক faster হবে
+    if(req.action==='bootstrap') return output(dispatch(req));
     const lock=LockService.getScriptLock(); lock.waitLock(20000);
     try { return output(dispatch(req)); } finally { lock.releaseLock(); }
   } catch(err){ return output({success:false,message:String(err.message||err),data:null}); }
@@ -88,6 +90,7 @@ function completeProfile(actor,p){
   if(actor.profileComplete) throw new Error('সম্পন্ন প্রোফাইল সরাসরি পরিবর্তন করা যাবে না');
   ['fullName','presentAddress','permanentAddress','phone','fatherPhone','nid'].forEach(k=>{if(!String(p[k]||'').trim()) throw new Error('সব তথ্য পূরণ করা আবশ্যক');});
   updateById(SHEETS.USERS,'id',actor.id,{fullName:clean(p.fullName),presentAddress:clean(p.presentAddress),permanentAddress:clean(p.permanentAddress),phone:clean(p.phone),fatherPhone:clean(p.fatherPhone),nid:clean(p.nid),profileComplete:true});
+  invalidateDashboardCache(actor.id);
   audit(actor.id,'PROFILE_COMPLETED',''); return ok('প্রোফাইল সম্পন্ন হয়েছে',{});
 }
 function createUser(actor,p){
@@ -115,7 +118,11 @@ function addRecord(actor,p){
   const qty=Number(p.quantity), price=Number(p.unitPrice); if(!(qty>0)||price<0||!isFinite(price)) throw new Error('পরিমাণ বা মূল্য সঠিক নয়');
   const date=String(p.date||''); if(!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new Error('তারিখ YYYY-MM-DD ফরম্যাটে দিন');
   const shName=taskSheetName(task), record={id:uuid(),userId:actor.id,userName:actor.fullName||actor.username,date:date,quantity:qty,unit:task.unit,unitPrice:price,total:qty*price,note:clean(p.note),createdAt:now(),createdBy:actor.id,updatedAt:''};
-  appendObject(shName,RECORD_HEADERS,record); audit(actor.id,'ADD_RECORD',task.id+':'+record.id); return ok('বিক্রির হিসাব সংরক্ষিত হয়েছে',{});
+  appendObject(shName,RECORD_HEADERS,record);
+  // date কে plain text format-এ সেট করি যাতে Sheet auto-convert না করে
+  const _sh=ss().getSheetByName(shName);const _dc=RECORD_HEADERS.indexOf('date')+1;if(_dc>0)_sh.getRange(_sh.getLastRow(),_dc).setNumberFormat('@');
+  invalidateDashboardCache(actor.id);
+  audit(actor.id,'ADD_RECORD',task.id+':'+record.id); return ok('বিক্রির হিসাব সংরক্ষিত হয়েছে',{});
 }
 function requestChange(actor,p){
   const found=findRecord(String(p.recordId||'')); if(!found||found.record.userId!==actor.id) throw new Error('নিজের হিসাব ছাড়া পরিবর্তন করা যাবে না');
@@ -127,13 +134,32 @@ function requestChange(actor,p){
 function decideRequest(actor,p){
   const req=sheetObjects(SHEETS.REQUESTS).find(r=>r.id===String(p.requestId));if(!req||req.status!=='PENDING')throw new Error('অপেক্ষমাণ অনুরোধ পাওয়া যায়নি');
   const approve=p.approve===true||String(p.approve)==='true';
-  if(approve){const found=findRecord(req.recordId);if(!found)throw new Error('মূল হিসাব পাওয়া যায়নি');updateRow(found.sheet,found.record._row,{quantity:Number(req.newQuantity),unitPrice:Number(req.newUnitPrice),total:Number(req.newQuantity)*Number(req.newUnitPrice),note:req.newNote,updatedAt:now()});}
+  if(approve){const found=findRecord(req.recordId);if(!found)throw new Error('মূল হিসাব পাওয়া যায়নি');updateRow(found.sheet,found.record._row,{quantity:Number(req.newQuantity),unitPrice:Number(req.newUnitPrice),total:Number(req.newQuantity)*Number(req.newUnitPrice),note:req.newNote,updatedAt:now()});invalidateDashboardCache(found.record.userId);}
   updateById(SHEETS.REQUESTS,'id',req.id,{status:approve?'APPROVED':'REJECTED',decidedBy:actor.id,decidedAt:now()});audit(actor.id,approve?'APPROVE_CHANGE':'REJECT_CHANGE',req.id);return ok(approve?'পরিবর্তন অনুমোদিত হয়েছে':'অনুরোধ বাতিল হয়েছে',{});
 }
 function getDashboard(userId){
-  const today=Utilities.formatDate(new Date(),Session.getScriptTimeZone()||'Asia/Dhaka','yyyy-MM-dd'), month=today.substring(0,7);let tq=0,ts=0,mq=0,ms=0,all=[];
-  sheetObjects(SHEETS.TASKS).forEach(t=>{const name=taskSheetName(t);const sh=SpreadsheetApp.getActive().getSheetByName(name);if(!sh)return;sheetObjects(name).filter(r=>r.userId===userId).forEach(r=>{r.taskId=t.id;r.taskName=t.name;r.quantity=Number(r.quantity)||0;r.unitPrice=Number(r.unitPrice)||0;r.total=Number(r.total)||0;all.push(r);if(r.date===today){tq+=r.quantity;ts+=r.total}if(String(r.date).indexOf(month)===0){mq+=r.quantity;ms+=r.total}});});
-  all.sort((a,b)=>String(b.createdAt).localeCompare(String(a.createdAt))); return {todayQuantity:tq,todaySales:ts,monthQuantity:mq,monthSales:ms,recordCount:all.length,recentRecords:all.slice(0,100)};
+  const today=Utilities.formatDate(new Date(),Session.getScriptTimeZone()||'Asia/Dhaka','yyyy-MM-dd'), month=today.substring(0,7);
+  // CacheService: 60 সেকেন্ড cache — repeat bootstrap call এর সময় অনেক faster
+  const cache=CacheService.getScriptCache();
+  const cacheKey='dashboard_'+userId+'_'+today;
+  const cached=cache.get(cacheKey);
+  if(cached){try{return JSON.parse(cached);}catch(_){}}
+  let tq=0,ts=0,mq=0,ms=0,all=[];
+  // Google Sheets date-কে YYYY-MM-DD string-এ convert করে (Sheet সাধারণত Date অবজেক্ট হিসেবে রিটার্ন করে, যা string-এর সাথে মেলে না)
+  const toDateStr=(v)=>{if(v instanceof Date)return Utilities.formatDate(v,Session.getScriptTimeZone()||'Asia/Dhaka','yyyy-MM-dd');return String(v||'');};
+  sheetObjects(SHEETS.TASKS).forEach(t=>{const name=taskSheetName(t);const sh=SpreadsheetApp.getActive().getSheetByName(name);if(!sh)return;sheetObjects(name).filter(r=>r.userId===userId).forEach(r=>{r.taskId=t.id;r.taskName=t.name;r.quantity=Number(r.quantity)||0;r.unitPrice=Number(r.unitPrice)||0;r.total=Number(r.total)||0;r.date=toDateStr(r.date);all.push(r);if(r.date===today){tq+=r.quantity;ts+=r.total}if(r.date.indexOf(month)===0){mq+=r.quantity;ms+=r.total}});});
+  all.sort((a,b)=>String(b.createdAt).localeCompare(String(a.createdAt)));
+  const result={todayQuantity:tq,todaySales:ts,monthQuantity:mq,monthSales:ms,recordCount:all.length,recentRecords:all.slice(0,100)};
+  try{cache.put(cacheKey, JSON.stringify(result), 60);}catch(_){}
+  return result;
+}
+
+/** AddRecord/completeProfile/decideRequest এর পর এই userId-এর cache invalidate করি যাতে পরবর্তী bootstrap-এ fresh data পাওয়া যায় */
+function invalidateDashboardCache(userId){
+  try{
+    const today=Utilities.formatDate(new Date(),Session.getScriptTimeZone()||'Asia/Dhaka','yyyy-MM-dd');
+    CacheService.getScriptCache().remove('dashboard_'+userId+'_'+today);
+  }catch(_){}
 }
 function findRecord(id){for(const t of sheetObjects(SHEETS.TASKS)){const s=taskSheetName(t),sh=SpreadsheetApp.getActive().getSheetByName(s);if(!sh)continue;const r=sheetObjects(s).find(x=>x.id===id);if(r)return{record:r,task:t,sheet:s};}return null;}
 function taskSheetName(t){return ('TASK_'+t.id+'_'+t.name).replace(/[\\\/?*\[\]:]/g,'_').substring(0,95);}

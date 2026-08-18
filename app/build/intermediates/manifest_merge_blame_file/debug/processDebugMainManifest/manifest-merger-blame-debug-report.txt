@@ -9,11 +9,11 @@
 9        android:targetSdkVersion="35" />
 10
 11    <uses-permission android:name="android.permission.INTERNET" />
-11-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:2:5-67
-11-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:2:22-64
+11-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:3:5-67
+11-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:3:22-64
 12    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-12-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:3:5-79
-12-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:3:22-76
+12-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:4:5-79
+12-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:4:22-76
 13    <uses-permission android:name="android.permission.WAKE_LOCK" />
 13-->[androidx.work:work-runtime:2.10.0] C:\Users\samur\.gradle\caches\8.9\transforms\fe8b07e7a2ef72200d9b23f02de23c60\transformed\work-runtime-2.10.0\AndroidManifest.xml:23:5-68
 13-->[androidx.work:work-runtime:2.10.0] C:\Users\samur\.gradle\caches\8.9\transforms\fe8b07e7a2ef72200d9b23f02de23c60\transformed\work-runtime-2.10.0\AndroidManifest.xml:23:22-65
@@ -36,27 +36,27 @@
 21-->[androidx.core:core:1.15.0] C:\Users\samur\.gradle\caches\8.9\transforms\3a6de80167e84ff48cca20a899a2ff89\transformed\core-1.15.0\AndroidManifest.xml:26:22-94
 22
 23    <application
-23-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:4:5-12:19
+23-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:6:5-28:19
 24        android:name="com.uddoktahisab.app.UddoktaApp"
-24-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:4:65-91
+24-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:7:9-35
 25        android:allowBackup="false"
-25-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:4:92-119
+25-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:8:9-36
 26        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
 26-->[androidx.core:core:1.15.0] C:\Users\samur\.gradle\caches\8.9\transforms\3a6de80167e84ff48cca20a899a2ff89\transformed\core-1.15.0\AndroidManifest.xml:28:18-86
 27        android:debuggable="true"
 28        android:extractNativeLibs="false"
-29        android:label="উদ্যোক্তা হিসাব"
-29-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:4:120-151
+29        android:label="উদ্যোক্তা"
+29-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:9:9-34
 30        android:testOnly="true"
 31        android:theme="@style/Theme.UddoktaHisab"
-31-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:4:152-193
+31-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:10:9-50
 32        android:usesCleartextTraffic="false" >
-32-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:4:194-230
+32-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:11:9-45
 33        <provider
 34            android:name="androidx.startup.InitializationProvider"
-34-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:5:19-73
+34-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:13:13-67
 35            android:authorities="com.uddoktahisab.app.androidx-startup"
-35-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:5:74-129
+35-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:14:13-68
 36            android:exported="false" >
 36-->[androidx.work:work-runtime:2.10.0] C:\Users\samur\.gradle\caches\8.9\transforms\fe8b07e7a2ef72200d9b23f02de23c60\transformed\work-runtime-2.10.0\AndroidManifest.xml:32:13-37
 37            <meta-data
@@ -80,20 +80,20 @@
 46        </provider>
 47
 48        <activity
-48-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:6:9-11:20
+48-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:20:9-27:20
 49            android:name="com.uddoktahisab.app.MainActivity"
-49-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:6:19-47
+49-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:21:13-41
 50            android:exported="true" >
-50-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:6:48-71
+50-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:22:13-36
 51            <intent-filter>
-51-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:7:13-10:29
+51-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:23:13-26:29
 52                <action android:name="android.intent.action.MAIN" />
-52-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:8:17-69
-52-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:8:25-66
+52-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:24:17-69
+52-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:24:25-66
 53
 54                <category android:name="android.intent.category.LAUNCHER" />
-54-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:9:17-77
-54-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:9:27-74
+54-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:25:17-77
+54-->D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:25:27-74
 55            </intent-filter>
 56        </activity>
 57        <activity

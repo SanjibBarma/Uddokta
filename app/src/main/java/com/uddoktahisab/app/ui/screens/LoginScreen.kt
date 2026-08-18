@@ -67,14 +67,11 @@ fun LoginScreen(error: String?, onLogin: (String, String) -> Unit, onClear: () -
             elevation = CardDefaults.cardElevation(8.dp)
         ) {
             Column(Modifier.padding(26.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text(
-                    "স্বাগতম",
-                    fontSize = 25.sp,
-                    fontWeight = FontWeight.Bold
-                ); Text(
-                "অ্যাডমিনের দেওয়া ইউজারনেম ও পাসওয়ার্ড দিয়ে প্রবেশ করুন",
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            ); OutlinedTextField(
+                Text("স্বাগতম", fontSize = 25.sp, fontWeight = FontWeight.Bold);
+
+                Text("ইউজারনেম ও পাসওয়ার্ড দিয়ে প্রবেশ করুন", color = MaterialTheme.colorScheme.onSurfaceVariant);
+
+                OutlinedTextField(
                 user,
                 { user = it; onClear() },
                 Modifier.fillMaxWidth(),
@@ -82,7 +79,9 @@ fun LoginScreen(error: String?, onLogin: (String, String) -> Unit, onClear: () -
                 leadingIcon = { Icon(Icons.Rounded.Person, null) },
                 singleLine = true,
                 shape = RoundedCornerShape(16.dp)
-            ); OutlinedTextField(
+                );
+
+                OutlinedTextField(
                 pass,
                 { pass = it; onClear() },
                 Modifier.fillMaxWidth(),

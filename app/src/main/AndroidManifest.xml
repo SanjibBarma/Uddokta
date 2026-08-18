@@ -1,9 +1,25 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <application xmlns:tools="http://schemas.android.com/tools" android:name=".UddoktaApp" android:allowBackup="false" android:label="উদ্যোক্তা হিসাব" android:theme="@style/Theme.UddoktaHisab" android:usesCleartextTraffic="false">
-        <provider android:name="androidx.startup.InitializationProvider" android:authorities="${applicationId}.androidx-startup" tools:node="merge"><meta-data android:name="androidx.work.WorkManagerInitializer" tools:node="remove" /></provider>
-        <activity android:name=".MainActivity" android:exported="true">
+
+    <application xmlns:tools="http://schemas.android.com/tools"
+        android:name=".UddoktaApp"
+        android:allowBackup="false"
+        android:label="উদ্যোক্তা"
+        android:theme="@style/Theme.UddoktaHisab"
+        android:usesCleartextTraffic="false">
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                tools:node="remove" />
+        </provider>
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

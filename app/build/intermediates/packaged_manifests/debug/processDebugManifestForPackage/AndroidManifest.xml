@@ -26,7 +26,7 @@
         android:appComponentFactory="androidx.core.app.CoreComponentFactory"
         android:debuggable="true"
         android:extractNativeLibs="false"
-        android:label="উদ্যোক্তা হিসাব"
+        android:label="উদ্যোক্তা"
         android:testOnly="true"
         android:theme="@style/Theme.UddoktaHisab"
         android:usesCleartextTraffic="false" >

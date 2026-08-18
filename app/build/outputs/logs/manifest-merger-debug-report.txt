@@ -1,6 +1,6 @@
 -- Merging decision tree log ---
 provider#androidx.startup.InitializationProvider
-INJECTED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:5:9-245
+INJECTED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:12:9-19:20
 MERGED from [androidx.work:work-runtime:2.10.0] C:\Users\samur\.gradle\caches\8.9\transforms\fe8b07e7a2ef72200d9b23f02de23c60\transformed\work-runtime-2.10.0\AndroidManifest.xml:29:9-37:20
 MERGED from [androidx.work:work-runtime:2.10.0] C:\Users\samur\.gradle\caches\8.9\transforms\fe8b07e7a2ef72200d9b23f02de23c60\transformed\work-runtime-2.10.0\AndroidManifest.xml:29:9-37:20
 MERGED from [androidx.emoji2:emoji2:1.3.0] C:\Users\samur\.gradle\caches\8.9\transforms\e7dacae607132f83ac84f78c820c58db\transformed\emoji2-1.3.0\AndroidManifest.xml:24:9-32:20
@@ -12,19 +12,19 @@ MERGED from [androidx.profileinstaller:profileinstaller:1.4.0] C:\Users\samur\.g
 MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\samur\.gradle\caches\8.9\transforms\497791f0725a98193454277ae9dee35b\transformed\startup-runtime-1.1.1\AndroidManifest.xml:26:9-30:34
 MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\samur\.gradle\caches\8.9\transforms\497791f0725a98193454277ae9dee35b\transformed\startup-runtime-1.1.1\AndroidManifest.xml:26:9-30:34
 	tools:node
-		ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:5:130-148
+		ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:15:13-31
 	android:authorities
 		INJECTED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml
-		ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:5:74-129
+		ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:14:13-68
 	android:exported
 		ADDED from [androidx.work:work-runtime:2.10.0] C:\Users\samur\.gradle\caches\8.9\transforms\fe8b07e7a2ef72200d9b23f02de23c60\transformed\work-runtime-2.10.0\AndroidManifest.xml:32:13-37
 	android:name
-		ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:5:19-73
+		ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:13:13-67
 manifest
-ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:1:1-13:12
-INJECTED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:1:1-13:12
-INJECTED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:1:1-13:12
-INJECTED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:1:1-13:12
+ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:1:1-29:12
+INJECTED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:1:1-29:12
+INJECTED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:1:1-29:12
+INJECTED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:1:1-29:12
 MERGED from [androidx.hilt:hilt-navigation-compose:1.2.0] C:\Users\samur\.gradle\caches\8.9\transforms\12ec77c8f0ef27e9e667039aa0010280\transformed\hilt-navigation-compose-1.2.0\AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.hilt:hilt-navigation:1.2.0] C:\Users\samur\.gradle\caches\8.9\transforms\ad4d9f30753e121dfdf5f15fa8c11043\transformed\hilt-navigation-1.2.0\AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.navigation:navigation-common:2.8.5] C:\Users\samur\.gradle\caches\8.9\transforms\1415fcaf370dc756b99de55dfdbf5194\transformed\navigation-common-2.8.5\AndroidManifest.xml:17:1-22:12
@@ -110,18 +110,18 @@ MERGED from [com.google.dagger:dagger-lint-aar:2.52] C:\Users\samur\.gradle\cach
 	xmlns:android
 		ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:1:11-69
 uses-permission#android.permission.INTERNET
-ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:2:5-67
+ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:3:5-67
 	android:name
-		ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:2:22-64
+		ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:3:22-64
 uses-permission#android.permission.ACCESS_NETWORK_STATE
-ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:3:5-79
+ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:4:5-79
 MERGED from [androidx.work:work-runtime:2.10.0] C:\Users\samur\.gradle\caches\8.9\transforms\fe8b07e7a2ef72200d9b23f02de23c60\transformed\work-runtime-2.10.0\AndroidManifest.xml:24:5-79
 MERGED from [androidx.work:work-runtime:2.10.0] C:\Users\samur\.gradle\caches\8.9\transforms\fe8b07e7a2ef72200d9b23f02de23c60\transformed\work-runtime-2.10.0\AndroidManifest.xml:24:5-79
 	android:name
-		ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:3:22-76
+		ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:4:22-76
 application
-ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:4:5-12:19
-INJECTED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:4:5-12:19
+ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:6:5-28:19
+INJECTED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:6:5-28:19
 MERGED from [androidx.compose.ui:ui-tooling-android:1.7.6] C:\Users\samur\.gradle\caches\8.9\transforms\7a678587158daf9076cbfa62f8227a61\transformed\ui-tooling-release\AndroidManifest.xml:22:5-26:19
 MERGED from [androidx.compose.ui:ui-tooling-android:1.7.6] C:\Users\samur\.gradle\caches\8.9\transforms\7a678587158daf9076cbfa62f8227a61\transformed\ui-tooling-release\AndroidManifest.xml:22:5-26:19
 MERGED from [androidx.compose.ui:ui-test-manifest:1.7.6] C:\Users\samur\.gradle\caches\8.9\transforms\2115506a29cc3bb69d849455d820d514\transformed\ui-test-manifest-1.7.6\AndroidManifest.xml:22:5-26:19
@@ -147,40 +147,40 @@ MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\sa
 	android:appComponentFactory
 		ADDED from [androidx.core:core:1.15.0] C:\Users\samur\.gradle\caches\8.9\transforms\3a6de80167e84ff48cca20a899a2ff89\transformed\core-1.15.0\AndroidManifest.xml:28:18-86
 	android:label
-		ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:4:120-151
+		ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:9:9-34
 	xmlns:tools
-		ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:4:18-64
+		ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:6:18-64
 	android:allowBackup
-		ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:4:92-119
+		ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:8:9-36
 	android:theme
-		ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:4:152-193
+		ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:10:9-50
 	android:usesCleartextTraffic
-		ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:4:194-230
+		ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:11:9-45
 	android:name
-		ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:4:65-91
+		ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:7:9-35
 activity#com.uddoktahisab.app.MainActivity
-ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:6:9-11:20
+ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:20:9-27:20
 	android:exported
-		ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:6:48-71
+		ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:22:13-36
 	android:name
-		ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:6:19-47
+		ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:21:13-41
 intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
-ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:7:13-10:29
+ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:23:13-26:29
 action#android.intent.action.MAIN
-ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:8:17-69
+ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:24:17-69
 	android:name
-		ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:8:25-66
+		ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:24:25-66
 category#android.intent.category.LAUNCHER
-ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:9:17-77
+ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:25:17-77
 	android:name
-		ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:9:27-74
+		ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:25:27-74
 meta-data#androidx.work.WorkManagerInitializer
-ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:5:149-234
+ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:16:13-18:39
 REJECTED from [androidx.work:work-runtime:2.10.0] C:\Users\samur\.gradle\caches\8.9\transforms\fe8b07e7a2ef72200d9b23f02de23c60\transformed\work-runtime-2.10.0\AndroidManifest.xml:34:13-36:52
 	tools:node
-		ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:5:212-231
+		ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:18:17-36
 	android:name
-		ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:5:160-211
+		ADDED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml:17:17-68
 uses-sdk
 INJECTED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml

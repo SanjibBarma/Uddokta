@@ -70,7 +70,6 @@ class AppRepository @Inject constructor(
             val r = api.action(BuildConfig.API_URL, ApiRequest(name, t, payload + ("deploymentId" to deployment)))
             if (!r.success) {
                 local.revertOptimistic(name, payload)  // ← revert on failure
-                runCatching { remoteBootstrap() }
                 throw IllegalStateException(r.message)
             }
             r.message

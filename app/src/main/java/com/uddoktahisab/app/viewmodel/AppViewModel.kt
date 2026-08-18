@@ -6,7 +6,9 @@ import com.uddoktahisab.app.data.model.*
 import com.uddoktahisab.app.data.repository.AppRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import javax.inject.Inject
@@ -17,7 +19,9 @@ data class AppUiState(
     val data: BootstrapData? = null,
     val error: String? = null,
     val notice: String? = null,
-    val offline: Boolean = false
+    val offline: Boolean = false,
+    /** নিচের tab-এর index: 0=ড্যাশবোর্ড, 1=বিক্রি, 2=হিসাব, 3=অ্যাডমিন, 4=প্রোফাইল */
+    val selectedTab: Int = 0
 )
 
 @HiltViewModel
@@ -30,6 +34,29 @@ class AppViewModel @Inject constructor(private val repo: AppRepository) : ViewMo
             if (repo.hasSession()) refresh() else {
                 runCatching { repo.initialize() }; _state.value =
                     AppUiState(loading = false, offline = !repo.isOnline())
+            }
+        }
+        // ─── Background polling: লগইন থাকা অবস্থায় প্রতি 60 সেকেন্ডে fresh data আনে ───
+        startBackgroundPolling()
+    }
+
+    /**
+     * Foreground-এ থাকা অবস্থায় প্রতি 60 সেকেন্ডে server থেকে fresh data আনে।
+     * কোনো user/profile/sale পরিবর্তন হলে dashboard স্বয়ংক্রিয়ভাবে আপডেট হবে।
+     */
+    private fun startBackgroundPolling() {
+        viewModelScope.launch {
+            while (isActive) {
+                delay(60_000L)
+                val s = _state.value
+                if (!s.loggedIn || s.data == null || !repo.isOnline() || s.loading) continue
+                runCatching { repo.remoteBootstrap() }.onSuccess { fresh ->
+                    _state.value = _state.value.copy(
+                        data = fresh,
+                        loading = false,
+                        offline = false
+                    )
+                }
             }
         }
     }
@@ -50,11 +77,23 @@ class AppViewModel @Inject constructor(private val repo: AppRepository) : ViewMo
     }
 
     fun refresh() = viewModelScope.launch {
-        val cached = repo.cachedBootstrap(); if (cached != null) _state.value =
-        AppUiState(false, true, cached, offline = !repo.isOnline()) else _state.value =
-        _state.value.copy(loading = true, error = null)
-        if (repo.isOnline()) runCatching { repo.remoteBootstrap() }.onSuccess {
-            _state.value = AppUiState(false, true, it)
+        val cached = repo.cachedBootstrap()
+        if (cached != null) {
+            // selectedTab সংরক্ষণ করি যাতে refresh করলে user যেখানে ছিল সেখানেই থাকে
+            _state.value = _state.value.copy(
+                loggedIn = true,
+                data = cached,
+                offline = !repo.isOnline(),
+                loading = false
+            )
+        } else _state.value = _state.value.copy(loading = true, error = null)
+        if (repo.isOnline()) runCatching { repo.remoteBootstrap() }.onSuccess { fresh ->
+            _state.value = _state.value.copy(
+                loggedIn = true,
+                data = fresh,
+                loading = false,
+                offline = false
+            )
         }.onFailure { _state.value = _state.value.copy(loading = false, error = it.message) }
         else _state.value = _state.value.copy(
             loading = false,
@@ -124,46 +163,31 @@ class AppViewModel @Inject constructor(private val repo: AppRepository) : ViewMo
         runCatching {
             repo.action(name, payload)
         }.onSuccess { message ->
-            // fresh data আনার জন্য অপেক্ষা করুন
-            if (repo.isOnline()) {
-                runCatching { repo.remoteBootstrap() }
-                    .onSuccess { bootstrap ->
-                        _state.value = AppUiState(
-                            loading = false, loggedIn = true,
-                            data = bootstrap, notice = message,
-                            offline = !repo.isOnline()
-                        )
-                    }
-                    .onFailure {
-                        // remote ব্যর্থ হলে optimistic cache ব্যবহার করুন
-                        val cached = repo.cachedBootstrap()
-                        _state.value = _state.value.copy(
-                            loading = false,
-                            data = cached ?: _state.value.data,
-                            loggedIn = true,
-                            notice = message,
-                            offline = !repo.isOnline()
-                        )
-                    }
-            } else {
-                val cached = repo.cachedBootstrap()
-                _state.value = _state.value.copy(
-                    loading = false,
-                    data = cached ?: _state.value.data,
-                    loggedIn = true,
-                    notice = message,
-                    offline = true
-                )
-            }
+            // Optimistic cache (repo.action() এ local.optimistic() দিয়ে আপডেট হয়েছে) —
+            // extra remoteBootstrap() skip করায় action অনেক দ্রুত সম্পন্ন হয়।
+            // সব save/edit-এর পর ড্যাশবোর্ডে redirect।
+            val cached = repo.cachedBootstrap()
+            _state.value = _state.value.copy(
+                loading = false,
+                data = cached ?: _state.value.data,
+                loggedIn = true,
+                notice = message,
+                offline = !repo.isOnline(),
+                selectedTab = 0
+            )
         }.onFailure {
-            // API ব্যর্থ হলে optimistic revert করা উচিত
-            // সরলতার জন্য শুধু error দেখান
             _state.value = _state.value.copy(loading = false, error = it.message)
         }
     }
 
     fun clearError() {
         _state.value = _state.value.copy(error = null, notice = null)
+    }
+
+    /** MainShell এর bottom-tab বদলায়; action success এ ড্যাশবোর্ডে ফেরাতেও ব্যবহৃত */
+    fun selectTab(index: Int) {
+        if (_state.value.selectedTab == index) return
+        _state.value = _state.value.copy(selectedTab = index.coerceAtLeast(0))
     }
 
     fun logout() = viewModelScope.launch {
