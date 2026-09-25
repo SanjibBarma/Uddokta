@@ -83,6 +83,7 @@ private fun HistoryRecordCard(r: SaleRecord, onEdit: (() -> Unit)? = null) {
                 Text("বার/দিন: $bar", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Text("পরিমাণ: ${number(r.quantity)} ${r.unit}", fontSize = 13.sp)
                 Text("একক মূল্য: ${money(r.unitPrice)}", fontSize = 13.sp)
+                Text("নোট: ${r.note}", fontSize = 13.sp)
                 Text("মোট মূল্য: ${money(r.total)}",
                     fontWeight = FontWeight.ExtraBold,
                     fontSize = 16.sp,
@@ -119,7 +120,8 @@ fun HistoryScreen(
             )
             Text(
                 if (isAdmin) "সকলের বিক্রির হিসাব" else "পরিবর্তন করতে অ্যাডমিনের অনুমতি আবশ্যক",
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 12.sp
             )
         }
         if (records.isEmpty()) item { EmptyCard("কোনো হিসাব পাওয়া যায়নি") }

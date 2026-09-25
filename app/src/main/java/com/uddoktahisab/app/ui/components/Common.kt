@@ -47,7 +47,7 @@ fun BrandMark(compact: Boolean = false) {
             Text(
                 "উদ্যোক্তা",
                 fontWeight = FontWeight.ExtraBold,
-                fontSize = if (compact) 20.sp else 27.sp
+                fontSize = if (compact) 27.sp else 27.sp
             ); if (!compact) Text(
             "ব্যবসার প্রতিটি হিসাব, হাতের মুঠোয়",
             color = MaterialTheme.colorScheme.onSurfaceVariant,

@@ -66,11 +66,12 @@ fun ProfileScreen(
             item {
                 Spacer(Modifier.height(8.dp)); Text(
                 if (locked) "প্রোফাইল ১০০% সম্পন্ন করুন" else "আমার প্রোফাইল",
-                fontSize = 25.sp,
+                fontSize = 27.sp,
                 fontWeight = FontWeight.ExtraBold
             ); Text(
                 "সব তথ্য পূরণ না করা পর্যন্ত অন্য কোনো ফিচার দেখা যাবে না।",
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 12.sp
             )
             }; item {
             ProfileField("পূর্ণ নাম", name, enabled = locked) {

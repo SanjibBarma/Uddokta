@@ -17,13 +17,18 @@ import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,9 +43,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.uddoktahisab.app.data.model.Task
 import com.uddoktahisab.app.ui.components.money
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
 import kotlin.collections.forEach
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SaleScreen(tasks: List<Task>, onSave: (Task, String, Double, Double, String) -> Unit) {
     var selected by remember { mutableStateOf<Task?>(null) };
@@ -49,9 +57,48 @@ fun SaleScreen(tasks: List<Task>, onSave: (Task, String, Double, Double, String)
     var price by remember { mutableStateOf("") };
     var note by remember { mutableStateOf("") };
     var expanded by remember { mutableStateOf(false) };
+    var showDatePicker by remember { mutableStateOf(false) };
+
     val total = (qty.toDoubleOrNull() ?: 0.0) * (price.toDoubleOrNull() ?: 0.0)
-    val keyboard = LocalSoftwareKeyboardController.current  // ← যোগ
+    val keyboard = LocalSoftwareKeyboardController.current
     val focus = LocalFocusManager.current
+
+    if (showDatePicker) {
+        val datePickerState = rememberDatePickerState()
+
+        DatePickerDialog(
+            onDismissRequest = {
+                showDatePicker = false
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        datePickerState.selectedDateMillis?.let {
+                            date = Instant.ofEpochMilli(it)
+                                .atZone(ZoneId.systemDefault())
+                                .toLocalDate()
+                                .toString()
+                        }
+                        showDatePicker = false
+                    }
+                ) {
+                    Text("ঠিক আছে")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showDatePicker = false
+                    }
+                ) {
+                    Text("বাতিল")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+
     LazyColumn(
         Modifier.fillMaxSize(),
         contentPadding = PaddingValues(20.dp),
@@ -63,8 +110,9 @@ fun SaleScreen(tasks: List<Task>, onSave: (Task, String, Double, Double, String)
                 fontSize = 27.sp,
                 fontWeight = FontWeight.ExtraBold
             ); Text(
-            "আপনাকে দেওয়া কাজ থেকে একটি বেছে নিন",
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            "বুঝে শুনে সব খালি ঘর (বা ছক) ভরাট করুন।",
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontSize = 12.sp
         )
         }; item {
         Box {
@@ -92,11 +140,24 @@ fun SaleScreen(tasks: List<Task>, onSave: (Task, String, Double, Double, String)
         }
     }; item {
         OutlinedTextField(
-            date,
-            { date = it },
-            Modifier.fillMaxWidth(),
+            value = date,
+            onValueChange = {},
+            Modifier
+                .fillMaxWidth(),
             label = { Text("তারিখ (YYYY-MM-DD)") },
-            shape = RoundedCornerShape(16.dp)
+            shape = RoundedCornerShape(16.dp),
+            readOnly = true,
+            trailingIcon = {
+                TextButton(
+                    onClick = {
+                        keyboard?.hide()
+                        focus.clearFocus(force = true)
+                        showDatePicker = true
+                    }
+                ) {
+                    Text("তারিখ")
+                }
+            }
         )
     }; item {
         OutlinedTextField(
