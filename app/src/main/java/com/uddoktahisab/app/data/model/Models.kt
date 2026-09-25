@@ -4,7 +4,9 @@ import com.google.gson.annotations.SerializedName
 
 enum class Role {
     @SerializedName("SUPER_ADMIN")
-    SUPER_ADMIN, @SerializedName("USER")
+    SUPER_ADMIN,
+
+    @SerializedName("USER")
     USER
 }
 
@@ -74,6 +76,20 @@ data class ApiResponse<T>(
 
 data class Assignment(val userId: String = "", val taskId: String = "", val active: Boolean = true)
 data class UserSummary(val user: User = User(), val dashboard: Dashboard = Dashboard())
+data class Sku(
+    val id: String = "",
+    val name: String = "",
+    val unit: String = "kg",
+    val totalStock: Double = 0.0,
+    val totalCost: Double = 0.0,
+    val totalSold: Double = 0.0,
+    val remaining: Double = 0.0,
+    val totalRevenue: Double = 0.0,
+    val profit: Double = 0.0,
+    val createdBy: String = "",
+    val createdAt: String = ""
+)
+
 data class BootstrapData(
     val user: User,
     val tasks: List<Task> = emptyList(),
@@ -81,5 +97,6 @@ data class BootstrapData(
     val users: List<User> = emptyList(),
     val requests: List<ChangeRequest> = emptyList(),
     val assignments: List<Assignment> = emptyList(),
-    val userSummaries: List<UserSummary> = emptyList()
+    val userSummaries: List<UserSummary> = emptyList(),
+    val skus: List<Sku>? = null
 )

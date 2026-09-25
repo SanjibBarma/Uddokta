@@ -4,13 +4,14 @@
  * add the first SUPER_ADMIN in USERS, then Deploy > Web app (Execute as me,
  * Who has access: Anyone). Never share the spreadsheet itself with normal users.
  */
-const SHEETS = { USERS:'USERS', TASKS:'TASKS', ASSIGN:'ASSIGNMENTS', REQUESTS:'CHANGE_REQUESTS', SESSIONS:'SESSIONS', AUDIT:'AUDIT_LOG' };
+const SHEETS = { USERS:'USERS', TASKS:'TASKS', ASSIGN:'ASSIGNMENTS', REQUESTS:'CHANGE_REQUESTS', SESSIONS:'SESSIONS', AUDIT:'AUDIT_LOG', SKUS:'SKUS' };
 const HEADERS = {
   USERS:['id','username','passwordHash','role','fullName','presentAddress','permanentAddress','phone','fatherPhone','nid','profileComplete','active','createdAt'],
   TASKS:['id','name','unit','active','createdAt'],
   ASSIGN:['userId','taskId','active','assignedBy','updatedAt'],
   REQUESTS:['id','recordId','userId','userName','taskId','reason','newQuantity','newUnitPrice','newNote','status','createdAt','decidedBy','decidedAt'],
-  SESSIONS:['token','userId','expiresAt'], AUDIT:['id','userId','action','details','createdAt']
+  SESSIONS:['token','userId','expiresAt'], AUDIT:['id','userId','action','details','createdAt'],
+  SKUS:['id','name','unit','totalStock','totalCost','createdBy','createdAt']
 };
 const RECORD_HEADERS=['id','userId','userName','date','quantity','unit','unitPrice','total','note','createdAt','createdBy','updatedAt'];
 
@@ -40,6 +41,9 @@ function dispatch(req){
     case 'createUser': requireAdmin(actor); return createUser(actor,p);
     case 'assignTasks': requireAdmin(actor); return assignTasks(actor,p);
     case 'decideChangeRequest': requireAdmin(actor); return decideRequest(actor,p);
+    case 'addSku': requireAdmin(actor); return addSku(actor,p);
+    case 'addPurchase': requireAdmin(actor); return addPurchase(actor,p);
+    case 'deleteSku': requireAdmin(actor); return deleteSku(actor,p);
     default: throw new Error('Unknown action: '+req.action);
   }
 }
@@ -76,6 +80,7 @@ function authenticate(token){
   if(!u || !toBool(u.active)) throw new Error('অ্যাকাউন্ট নিষ্ক্রিয়'); return normalizeUserObject(u);
 }
 function bootstrap(actor){
+  ensureSheet(SHEETS.SKUS,HEADERS.SKUS);
   const tasks=getTasks(actor); const dashboard=getDashboard(actor.id);
   const data={user:publicUser(actor),tasks:tasks,dashboard:dashboard,users:[],requests:[],assignments:[],userSummaries:[]};
   if(actor.role==='SUPER_ADMIN'){
@@ -83,6 +88,7 @@ function bootstrap(actor){
     data.requests=sheetObjects(SHEETS.REQUESTS).sort((a,b)=>String(b.createdAt).localeCompare(String(a.createdAt)));
     data.assignments=sheetObjects(SHEETS.ASSIGN).filter(a=>toBool(a.active)).map(a=>({userId:a.userId,taskId:a.taskId,active:true}));
     data.userSummaries=sheetObjects(SHEETS.USERS).map(u=>({user:publicUser(u),dashboard:getDashboard(u.id)}));
+    data.skus=listSkus();
   }
   return data;
 }
@@ -164,6 +170,76 @@ function invalidateDashboardCache(userId){
 function findRecord(id){for(const t of sheetObjects(SHEETS.TASKS)){const s=taskSheetName(t),sh=SpreadsheetApp.getActive().getSheetByName(s);if(!sh)continue;const r=sheetObjects(s).find(x=>x.id===id);if(r)return{record:r,task:t,sheet:s};}return null;}
 function taskSheetName(t){return ('TASK_'+t.id+'_'+t.name).replace(/[\\\/?*\[\]:]/g,'_').substring(0,95);}
 function requireAdmin(u){if(u.role!=='SUPER_ADMIN')throw new Error('শুধু সুপার অ্যাডমিন এই কাজ করতে পারবেন');}
+function listSkus(){
+  const skus=sheetObjects(SHEETS.SKUS);
+  // প্রতি unit-এ বিক্রি + revenue scan করি
+  const statsByUnit={};
+  sheetObjects(SHEETS.TASKS).forEach(function(t){
+    const sh=SpreadsheetApp.getActive().getSheetByName(taskSheetName(t));
+    if(!sh) return;
+    sheetObjects(taskSheetName(t)).forEach(function(r){
+      const u=String(r.unit||'');
+      if(!statsByUnit[u]) statsByUnit[u]={sold:0,revenue:0};
+      statsByUnit[u].sold+=Number(r.quantity)||0;
+      statsByUnit[u].revenue+=Number(r.total)||0;
+    });
+  });
+  return skus.map(function(s){
+    const totalStock=Number(s.totalStock)||0;
+    const totalCost=Number(s.totalCost)||0;
+    const stats=statsByUnit[s.unit]||{sold:0,revenue:0};
+    const totalSold=stats.sold;
+    const totalRevenue=stats.revenue;
+    const remaining=Math.max(0,totalStock-totalSold);
+    const profit=totalRevenue-totalCost;
+    return {
+      id:s.id, name:s.name, unit:s.unit,
+      totalStock:totalStock, totalSold:totalSold, remaining:remaining,
+      totalCost:totalCost, totalRevenue:totalRevenue, profit:profit,
+      createdBy:s.createdBy, createdAt:s.createdAt
+    };
+  });
+}
+function addSku(actor,p){
+  const name=clean(p.name||''), unit=clean(p.unit||'kg');
+  const totalStock=Number(p.totalStock)||0;
+  const totalCost=Number(p.totalCost)||0;
+  if(name.length<1) throw new Error('SKU নাম দিন');
+  if(totalStock<0) throw new Error('স্টক সংখ্যা ০ বা তার বেশি হতে হবে');
+  ensureSheet(SHEETS.SKUS,HEADERS.SKUS);
+  const skus=sheetObjects(SHEETS.SKUS);
+  if(skus.some(s=>normalizeUser(s.name)===normalizeUser(name))) throw new Error('এই SKU আগে থেকেই আছে');
+  const sku={id:uuid(),name:name,unit:unit,totalStock:totalStock,totalCost:totalCost,createdBy:actor.id,createdAt:now()};
+  appendObject(SHEETS.SKUS,HEADERS.SKUS,sku);
+  audit(actor.id,'ADD_SKU',name+':'+totalStock);
+  return ok('SKU যোগ হয়েছে',{sku:sku});
+}
+function deleteSku(actor,p){
+  const id=String(p.id||'');
+  if(!id) throw new Error('SKU আইডি দিন');
+  const rows=sheetObjects(SHEETS.SKUS);
+  const row=rows.find(s=>s.id===id);
+  if(!row) throw new Error('SKU পাওয়া যায়নি');
+  deleteRow(SHEETS.SKUS,row._row);
+  audit(actor.id,'DELETE_SKU',id);
+  return ok('SKU মুছে ফেলা হয়েছে',{});
+}
+function addPurchase(actor,p){
+  const skuId=String(p.skuId||'');
+  const quantity=Number(p.quantity)||0;
+  const cost=Number(p.cost)||0;
+  if(!skuId) throw new Error('SKU আইডি দিন');
+  if(quantity<=0) throw new Error('পরিমাণ ০ এর বেশি হতে হবে');
+  const rows=sheetObjects(SHEETS.SKUS);
+  const row=rows.find(s=>s.id===skuId);
+  if(!row) throw new Error('SKU পাওয়া যায়নি');
+  // Running totals — নতুন কেনা আগের totalStock/totalCost-এ যোগ হবে
+  const newStock=(Number(row.totalStock)||0)+quantity;
+  const newCost=(Number(row.totalCost)||0)+cost;
+  updateById(SHEETS.SKUS,'id',skuId,{totalStock:newStock,totalCost:newCost});
+  audit(actor.id,'ADD_PURCHASE',skuId+':+'+quantity+':'+cost);
+  return ok('কেনা যোগ হয়েছে',{totalStock:newStock,totalCost:newCost});
+}
 function publicUser(u){u=normalizeUserObject(u);return{id:u.id,username:u.username,role:u.role,fullName:u.fullName,presentAddress:u.presentAddress,permanentAddress:u.permanentAddress,phone:u.phone,fatherPhone:u.fatherPhone,nid:u.nid,profileComplete:u.profileComplete,active:u.active};}
 function normalizeUserObject(u){u.profileComplete=toBool(u.profileComplete);u.active=toBool(u.active);return u;}
 function normalizeUser(s){return String(s||'').trim().toLowerCase();} function clean(s){return String(s||'').trim();} function toBool(v){return v===true||String(v).toLowerCase()==='true'||v===1;}

@@ -218,6 +218,48 @@ fun DashboardScreen(data: BootstrapData, vm: AppViewModel) {
                         )
                     }
                 }
+                val skus = data.skus.orEmpty()
+                if (skus.isNotEmpty()) {
+                    item {
+                        Card(
+                            Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                        ) {
+                            Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Text("SKU স্টক বিবরণ", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                skus.take(8).forEach { sku ->
+                                    Card(
+                                        Modifier.fillMaxWidth(),
+                                        shape = RoundedCornerShape(12.dp),
+                                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                                    ) {
+                                        Column(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Text(sku.name, fontWeight = FontWeight.Bold, fontSize = 15.sp, modifier = Modifier.weight(1f))
+                                                Text(
+                                                    if (sku.profit >= 0) "লাভ ${money(sku.profit)}" else "ক্ষতি ${money(-sku.profit)}",
+                                                    fontSize = 12.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = if (sku.profit >= 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                                                )
+                                            }
+                                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                                Text("কেনা: ${number(sku.totalStock)} ${sku.unit}", fontSize = 12.sp, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                                                Text("বিক্রি: ${number(sku.totalSold)} ${sku.unit}", fontSize = 12.sp, color = MaterialTheme.colorScheme.error)
+                                                Text("বাকি: ${number(sku.remaining)} ${sku.unit}", fontSize = 12.sp, color = if (sku.remaining > 0) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
+                                            }
+                                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                                Text("খরচ: ${money(sku.totalCost)}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                                Text("বিক্রি: ${money(sku.totalRevenue)}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
                 item {
                     Card(
                         shape = RoundedCornerShape(18.dp),

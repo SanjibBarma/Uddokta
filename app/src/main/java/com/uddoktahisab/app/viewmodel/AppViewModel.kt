@@ -71,7 +71,8 @@ class AppViewModel @Inject constructor(private val repo: AppRepository) : ViewMo
         }.onSuccess {
             _state.value = AppUiState(false, true, it, offline = false)
         }.onFailure {
-            val msg = if (it is TimeoutCancellationException) "লগইন সময় শেষ। আবার চেষ্টা করুন।" else it.message
+            val msg =
+                if (it is TimeoutCancellationException) "লগইন সময় শেষ। আবার চেষ্টা করুন।" else it.message
             _state.value = AppUiState(false, false, error = msg, offline = !repo.isOnline())
         }
     }
@@ -157,6 +158,27 @@ class AppViewModel @Inject constructor(private val repo: AppRepository) : ViewMo
 
     fun decide(requestId: String, approve: Boolean) =
         action("decideChangeRequest", mapOf("requestId" to requestId, "approve" to approve))
+
+    fun addSku(
+        name: String,
+        unit: String = "kg",
+        totalStock: Double = 0.0,
+        totalCost: Double = 0.0
+    ) =
+        action(
+            "addSku", mapOf(
+                "name" to name,
+                "unit" to unit,
+                "totalStock" to totalStock,
+                "totalCost" to totalCost
+            )
+        )
+
+    fun addPurchase(skuId: String, quantity: Double, cost: Double) =
+        action("addPurchase", mapOf("skuId" to skuId, "quantity" to quantity, "cost" to cost))
+
+    fun deleteSku(id: String) =
+        action("deleteSku", mapOf("id" to id))
 
     private fun action(name: String, payload: Map<String, Any?>) = viewModelScope.launch {
         _state.value = _state.value.copy(loading = true, error = null)
