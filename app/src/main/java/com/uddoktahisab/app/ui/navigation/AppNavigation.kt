@@ -1,5 +1,7 @@
 package com.uddoktahisab.app.ui.navigation
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.material.icons.rounded.CloudOff
@@ -10,41 +12,63 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.uddoktahisab.app.ui.components.LoadingOverlay
 import com.uddoktahisab.app.ui.screens.*
 import com.uddoktahisab.app.viewmodel.AppViewModel
+import kotlinx.coroutines.delay
 
 @Composable
 fun AppNavigation(vm: AppViewModel = hiltViewModel()) {
-    val s by vm.state.collectAsState()
-    Box(Modifier.fillMaxSize()) {
-        when {
-            !s.loggedIn -> LoginScreen(s.error, vm::login, vm::clearError)
-            s.data == null || s.data!!.user.profileComplete != true -> ProfileScreen(
-                s.data?.user, vm::completeProfile, true, vm::logout
-            )
-            else -> MainShell(s.data!!, vm)
-        }
-        if (s.offline && s.loggedIn && !s.loading) {
-            AssistChip(
-                onClick = {},
-                label = { Text("Offline mode • ডাটা পরে sync হবে") },
-                leadingIcon = {
-                    Icon(
-                        androidx.compose.material.icons.Icons.Rounded.CloudOff,
-                        null
+    var showSplash by remember { mutableStateOf(true) }
+
+    LaunchedEffect(Unit) {
+        delay(1500L)
+        showSplash = false
+    }
+
+    Crossfade(
+        targetState = showSplash,
+        animationSpec = tween(400),
+        label = "SplashTransition"
+    ) { isSplash ->
+        if (isSplash) {
+            SplashScreen()
+        } else {
+            val s by vm.state.collectAsState()
+            Box(Modifier.fillMaxSize()) {
+                when {
+                    !s.loggedIn -> LoginScreen(s.error, vm::login, vm::clearError)
+                    s.data == null || s.data!!.user.profileComplete != true -> ProfileScreen(
+                        s.data?.user, vm::completeProfile, true, vm::logout
                     )
-                },
-                modifier = Modifier
-                    .padding(12.dp)
-                    .align(androidx.compose.ui.Alignment.TopCenter)
-            )
+                    else -> MainShell(s.data!!, vm)
+                }
+                if (s.offline && s.loggedIn && !s.loading) {
+                    AssistChip(
+                        onClick = {},
+                        label = { Text("Offline mode • ডাটা পরে sync হবে") },
+                        leadingIcon = {
+                            Icon(
+                                androidx.compose.material.icons.Icons.Rounded.CloudOff,
+                                null
+                            )
+                        },
+                        modifier = Modifier
+                            .statusBarsPadding()
+                            .padding(12.dp)
+                            .align(androidx.compose.ui.Alignment.TopCenter)
+                    )
+                }
+                val message = if (s.loggedIn) (s.error ?: s.notice) else null
+                if (message != null) {
+                    val bottomPadding = if (s.data?.user?.profileComplete == true) 80.dp else 16.dp
+                    Snackbar(
+                        Modifier
+                            .navigationBarsPadding()
+                            .padding(horizontal = 16.dp)
+                            .padding(bottom = bottomPadding)
+                            .align(androidx.compose.ui.Alignment.BottomCenter),
+                        action = { TextButton(vm::clearError) { Text("ঠিক আছে") } }) { Text(message) }
+                }
+                if (s.loading) LoadingOverlay()
+            }
         }
-        val message = if (s.loggedIn) (s.error ?: s.notice) else null
-        if (message != null) {
-            Snackbar(
-                Modifier
-                    .padding(16.dp)
-                    .align(androidx.compose.ui.Alignment.BottomCenter),
-                action = { TextButton(vm::clearError) { Text("ঠিক আছে") } }) { Text(message) }
-        }
-        if (s.loading) LoadingOverlay()
     }
 }

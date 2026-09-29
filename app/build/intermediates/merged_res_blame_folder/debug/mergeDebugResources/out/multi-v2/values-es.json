@@ -4,7 +4,24 @@
             "outputFile": "com.uddoktahisab.app-mergeDebugResources-69:/values-es/values-es.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\samur\\.gradle\\caches\\8.9\\transforms\\6b7dd962d63d21776423fc1a6ae12519\\transformed\\ui-release\\res\\values-es\\values-es.xml",
+                    "source": "C:\\Users\\samur\\.gradle\\caches\\8.14.5\\transforms\\f2f6976fa7a24bd073473b1578edf7bd\\transformed\\foundation-release\\res\\values-es\\values-es.xml",
+                    "from": {
+                        "startLines": "2,3",
+                        "startColumns": "4,4",
+                        "startOffsets": "55,155",
+                        "endColumns": "99,101",
+                        "endOffsets": "150,252"
+                    },
+                    "to": {
+                        "startLines": "85,86",
+                        "startColumns": "4,4",
+                        "startOffsets": "8927,9027",
+                        "endColumns": "99,101",
+                        "endOffsets": "9022,9124"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\samur\\.gradle\\caches\\8.14.5\\transforms\\3fd00c2c364e00bbd8c197b7bfc6f0e0\\transformed\\ui-release\\res\\values-es\\values-es.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
@@ -21,7 +38,7 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\samur\\.gradle\\caches\\8.9\\transforms\\6beccf4f767597a191fb31811f827858\\transformed\\material3-release\\res\\values-es\\values-es.xml",
+                    "source": "C:\\Users\\samur\\.gradle\\caches\\8.14.5\\transforms\\0f442314123ddeaa13c9f7db0fc85a34\\transformed\\material3-release\\res\\values-es\\values-es.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
@@ -38,7 +55,7 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\samur\\.gradle\\caches\\8.9\\transforms\\3a6de80167e84ff48cca20a899a2ff89\\transformed\\core-1.15.0\\res\\values-es\\values-es.xml",
+                    "source": "C:\\Users\\samur\\.gradle\\caches\\8.14.5\\transforms\\bfca1b623ba89bb44e929ed6a9fc2f45\\transformed\\core-1.15.0\\res\\values-es\\values-es.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9",
                         "startColumns": "4,4,4,4,4,4,4,4",
@@ -52,23 +69,6 @@
                         "startOffsets": "105,204,306,406,504,611,717,8553",
                         "endColumns": "98,101,99,97,106,105,119,100",
                         "endOffsets": "199,301,401,499,606,712,832,8649"
-                    }
-                },
-                {
-                    "source": "C:\\Users\\samur\\.gradle\\caches\\8.9\\transforms\\d0084222961eb446b6caef40a2ff3256\\transformed\\foundation-release\\res\\values-es\\values-es.xml",
-                    "from": {
-                        "startLines": "2,3",
-                        "startColumns": "4,4",
-                        "startOffsets": "55,155",
-                        "endColumns": "99,101",
-                        "endOffsets": "150,252"
-                    },
-                    "to": {
-                        "startLines": "85,86",
-                        "startColumns": "4,4",
-                        "startOffsets": "8927,9027",
-                        "endColumns": "99,101",
-                        "endOffsets": "9022,9124"
                     }
                 }
             ]

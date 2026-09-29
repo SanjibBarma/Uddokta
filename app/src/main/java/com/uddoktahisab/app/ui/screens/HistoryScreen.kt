@@ -7,11 +7,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.EditNote
 import androidx.compose.material3.AlertDialog
@@ -108,7 +111,9 @@ fun HistoryScreen(
 ) {
     var editing by remember { mutableStateOf<SaleRecord?>(null) }
     LazyColumn(
-        Modifier.fillMaxSize(),
+        Modifier
+            .fillMaxSize()
+            .imePadding(),
         contentPadding = PaddingValues(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -155,7 +160,10 @@ private fun ChangeDialog(
         onDismissRequest = onDismiss,
         title = { Text("পরিবর্তনের অনুমতি চান") },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(9.dp)
+            ) {
                 OutlinedTextField(q, { q = it }, label = { Text("নতুন পরিমাণ") })
                 OutlinedTextField(p, { p = it }, label = { Text("নতুন মূল্য") })
                 OutlinedTextField(n, { n = it }, label = { Text("নতুন নোট") })

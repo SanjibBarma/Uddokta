@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">উদ্যোক্তা হিসাব</string>
+    <style name="Theme.UddoktaHisab" parent="android:style/Theme.Material.Light.NoActionBar"><item name="android:fontFamily">sans</item><item name="android:windowLightStatusBar">true</item><item name="android:statusBarColor">#F7F8F3</item><item name="android:navigationBarColor">#F7F8F3</item></style>
+</resources>

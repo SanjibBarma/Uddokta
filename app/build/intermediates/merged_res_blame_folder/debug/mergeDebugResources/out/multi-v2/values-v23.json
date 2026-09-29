@@ -4,7 +4,7 @@
             "outputFile": "com.uddoktahisab.app-mergeDebugResources-69:/values-v23/values-v23.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\samur\\.gradle\\caches\\8.9\\transforms\\fe8b07e7a2ef72200d9b23f02de23c60\\transformed\\work-runtime-2.10.0\\res\\values-v23\\values-v23.xml",
+                    "source": "C:\\Users\\samur\\.gradle\\caches\\8.14.5\\transforms\\98528ec1e591872ea1b12d566d936125\\transformed\\work-runtime-2.10.0\\res\\values-v23\\values-v23.xml",
                     "from": {
                         "startLines": "2,3",
                         "startColumns": "4,4",

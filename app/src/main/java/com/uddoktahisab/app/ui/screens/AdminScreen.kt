@@ -2,7 +2,6 @@ package com.uddoktahisab.app.ui.screens
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,8 +13,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Delete
@@ -88,7 +89,10 @@ fun AdminScreen(data: BootstrapData, vm: AppViewModel) {
                 Text("নতুন ইউজার")
             }
             Spacer(Modifier.height(10.dp))
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
                 items(data.users) { u ->
                     Card(shape = RoundedCornerShape(18.dp)) {
                         Row(
@@ -124,7 +128,10 @@ fun AdminScreen(data: BootstrapData, vm: AppViewModel) {
                 }
             }
         } else if (tab == 1) {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
                 val requests = data.requests.filter { it.status == "PENDING" }
                 if (requests.isEmpty()) {
                     item { EmptyCard("কোনো অপেক্ষমাণ অনুরোধ নেই") }
@@ -145,7 +152,7 @@ fun AdminScreen(data: BootstrapData, vm: AppViewModel) {
                 }
             }
         } else if (tab == 2) {
-            SkuTab(data.skus.orEmpty(), vm)
+            SkuTab(data.skus.orEmpty(), vm, Modifier.weight(1f))
         }
     }
 
@@ -164,10 +171,14 @@ fun AdminScreen(data: BootstrapData, vm: AppViewModel) {
 }
 
 @Composable
-private fun SkuTab(skus: List<Sku>, vm: AppViewModel) {
+private fun SkuTab(
+    skus: List<Sku>,
+    vm: AppViewModel,
+    modifier: Modifier = Modifier
+) {
     var add by remember { mutableStateOf(false) }
     var purchaseFor by remember { mutableStateOf<Sku?>(null) }
-    Column {
+    Column(modifier) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 "SKU ইউনিট ব্যবস্থাপনা",
@@ -188,7 +199,10 @@ private fun SkuTab(skus: List<Sku>, vm: AppViewModel) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         } else {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 items(skus) { sku ->
                     Card(shape = RoundedCornerShape(14.dp)) {
                         Column(Modifier.fillMaxWidth().padding(12.dp)) {

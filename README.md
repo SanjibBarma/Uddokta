@@ -508,3 +508,5 @@ API ধীর
 Google Apps Script cold start-এর কারণে প্রথম request ধীর হতে পারে। Backend-এ setupSystem() শুধু
 initialize action-এ চলে; প্রতিটি login/bootstrap/sales request-এ নয়। Android cached data আগে দেখায়
 এবং OkHttp connection reuse করে।
+
+jks and release build info with keystore "uddokta"

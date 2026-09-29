@@ -8,9 +8,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.Person
@@ -59,9 +63,17 @@ fun LoginScreen(error: String?, onLogin: (String, String) -> Unit, onClear: () -
                     )
                 )
             )
-            .padding(24.dp), contentAlignment = Alignment.Center
+            .systemBarsPadding()
+            .imePadding(),
+        contentAlignment = Alignment.Center
     ) {
-        Column(Modifier.widthIn(max = 440.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            Modifier
+                .widthIn(max = 440.dp)
+                .verticalScroll(rememberScrollState())
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             BrandMark(); Spacer(Modifier.height(40.dp)); Card(
             shape = RoundedCornerShape(30.dp),
             elevation = CardDefaults.cardElevation(8.dp)
