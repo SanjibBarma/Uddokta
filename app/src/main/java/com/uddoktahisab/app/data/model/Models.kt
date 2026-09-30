@@ -91,7 +91,7 @@ data class Sku(
 )
 
 data class BootstrapData(
-    val user: User,
+    val user: User = User(),
     val tasks: List<Task> = emptyList(),
     val dashboard: Dashboard = Dashboard(),
     val users: List<User> = emptyList(),
