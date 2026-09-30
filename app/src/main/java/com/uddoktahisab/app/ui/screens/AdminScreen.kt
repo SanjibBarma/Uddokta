@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -44,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.uddoktahisab.app.data.model.BootstrapData
@@ -68,6 +70,7 @@ fun AdminScreen(data: BootstrapData, vm: AppViewModel) {
     Column(
         Modifier
             .fillMaxSize()
+            .imePadding()
             .padding(20.dp)
     ) {
         Text(
@@ -75,10 +78,46 @@ fun AdminScreen(data: BootstrapData, vm: AppViewModel) {
             fontSize = 27.sp,
             fontWeight = FontWeight.ExtraBold
         )
-        TabRow(tab) {
-            Tab(tab == 0, { tab = 0 }, text = { Text("ইউজার") })
-            Tab(tab == 1, { tab = 1 }, text = { Text("অনুমতির অনুরোধ") })
-            Tab(tab == 2, { tab = 2 }, text = { Text("SKU") })
+        TabRow(selectedTabIndex = tab) {
+            Tab(
+                selected = tab == 0,
+                onClick = { tab = 0 },
+                text = {
+                    Text(
+                        "ইউজার",
+                        maxLines = 1,
+                        softWrap = false,
+                        overflow = TextOverflow.Ellipsis,
+                        fontSize = 13.sp
+                    )
+                }
+            )
+            Tab(
+                selected = tab == 1,
+                onClick = { tab = 1 },
+                text = {
+                    Text(
+                        "অনুমতির অনুরোধ",
+                        maxLines = 1,
+                        softWrap = false,
+                        overflow = TextOverflow.Ellipsis,
+                        fontSize = 13.sp
+                    )
+                }
+            )
+            Tab(
+                selected = tab == 2,
+                onClick = { tab = 2 },
+                text = {
+                    Text(
+                        "SKU",
+                        maxLines = 1,
+                        softWrap = false,
+                        overflow = TextOverflow.Ellipsis,
+                        fontSize = 13.sp
+                    )
+                }
+            )
         }
         Spacer(Modifier.height(14.dp))
 
@@ -96,7 +135,9 @@ fun AdminScreen(data: BootstrapData, vm: AppViewModel) {
                 items(data.users) { u ->
                     Card(shape = RoundedCornerShape(18.dp)) {
                         Row(
-                            Modifier.fillMaxWidth().padding(15.dp),
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(15.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column(Modifier.weight(1f)) {
@@ -117,7 +158,7 @@ fun AdminScreen(data: BootstrapData, vm: AppViewModel) {
                                     )
                                 }
                             }
-                            Column {
+                            Column(horizontalAlignment = Alignment.End) {
                                 TextButton({
                                     viewSummary = data.userSummaries.find { it.user.id == u.id }
                                 }) { Text("হিসাব") }
@@ -138,10 +179,26 @@ fun AdminScreen(data: BootstrapData, vm: AppViewModel) {
                 }
                 items(requests) { r ->
                     Card(shape = RoundedCornerShape(18.dp)) {
-                        Column(Modifier.padding(15.dp)) {
+                        Column(
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(15.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
                             Text(r.userName, fontWeight = FontWeight.Bold)
-                            Text(r.reason)
-                            Row {
+                            Text(
+                                "নতুন পরিমাণ: ${number(r.newQuantity)} • নতুন মূল্য: ${money(r.newUnitPrice)}",
+                                fontSize = 13.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            if (r.newNote.isNotBlank()) {
+                                Text("নোট: ${r.newNote}", fontSize = 12.sp)
+                            }
+                            Text("কারণ: ${r.reason}", fontSize = 13.sp)
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
                                 TextButton({ vm.decide(r.id, false) }) {
                                     Text("বাতিল", color = MaterialTheme.colorScheme.error)
                                 }
@@ -211,7 +268,7 @@ private fun SkuTab(
                                     Text(sku.name, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                                     Text("একক: ${sku.unit}", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
-                                Row {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
                                     TextButton({ purchaseFor = sku }) {
                                         Text("আরো কিনেছি", fontSize = 12.sp)
                                     }
@@ -282,7 +339,10 @@ private fun AddPurchaseDialog(
         onDismissRequest = onDismiss,
         title = { Text("আরো কিনেছি — ${sku.name}") },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
                 Text(
                     "বর্তমান বাকি: ${number(sku.remaining)} ${sku.unit} • মোট খরচ: ${money(sku.totalCost)}",
                     fontSize = 12.sp,
@@ -322,7 +382,10 @@ private fun CreateSkuDialog(onDismiss: () -> Unit, onCreate: (String, String, Do
         onDismissRequest = onDismiss,
         title = { Text("নতুন SKU যোগ করুন") },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
                 Text("SKU-এর নাম, একক, প্রাথমিক স্টক ও মোট খরচ দিন।")
                 OutlinedTextField(n, { n = it }, label = { Text("SKU নাম (যেমন: চাল)") })
                 OutlinedTextField(u, { u = it }, label = { Text("একক (kg / pcs / liter)") })
@@ -358,7 +421,10 @@ private fun CreateUserDialog(close: () -> Unit, create: (String, String) -> Unit
         onDismissRequest = close,
         title = { Text("নতুন ইউজার তৈরি") },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
                 Text("শুধু অস্থায়ী ইউজারনেম ও পাসওয়ার্ড দিন। ইউজার নিজে প্রোফাইল পূরণ করবে।")
                 OutlinedTextField(u, { u = it }, label = { Text("ইউজারনেম") })
                 OutlinedTextField(p, { p = it }, label = { Text("অস্থায়ী পাসওয়ার্ড") })

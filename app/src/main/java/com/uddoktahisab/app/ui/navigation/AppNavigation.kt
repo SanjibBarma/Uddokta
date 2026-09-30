@@ -3,9 +3,11 @@ package com.uddoktahisab.app.ui.navigation
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CloudOff
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -46,26 +48,29 @@ fun AppNavigation(vm: AppViewModel = hiltViewModel()) {
                         label = { Text("Offline mode • ডাটা পরে sync হবে") },
                         leadingIcon = {
                             Icon(
-                                androidx.compose.material.icons.Icons.Rounded.CloudOff,
+                                Icons.Rounded.CloudOff,
                                 null
                             )
                         },
                         modifier = Modifier
-                            .statusBarsPadding()
+                            .windowInsetsPadding(WindowInsets.statusBars)
                             .padding(12.dp)
-                            .align(androidx.compose.ui.Alignment.TopCenter)
+                            .align(Alignment.TopCenter)
                     )
                 }
                 val message = if (s.loggedIn) (s.error ?: s.notice) else null
                 if (message != null) {
-                    val bottomPadding = if (s.data?.user?.profileComplete == true) 80.dp else 16.dp
+                    val bottomPadding = if (s.data?.user?.profileComplete == true) 88.dp else 16.dp
                     Snackbar(
                         Modifier
-                            .navigationBarsPadding()
+                            .windowInsetsPadding(WindowInsets.navigationBars)
                             .padding(horizontal = 16.dp)
                             .padding(bottom = bottomPadding)
-                            .align(androidx.compose.ui.Alignment.BottomCenter),
-                        action = { TextButton(vm::clearError) { Text("ঠিক আছে") } }) { Text(message) }
+                            .align(Alignment.BottomCenter),
+                        action = { TextButton(vm::clearError) { Text("ঠিক আছে") } }
+                    ) {
+                        Text(message)
+                    }
                 }
                 if (s.loading) LoadingOverlay()
             }

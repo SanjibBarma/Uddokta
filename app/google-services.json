@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "965984539888",
+    "project_id": "uddokta-2d692",
+    "storage_bucket": "uddokta-2d692.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:965984539888:android:e4cf97e3a1a717c4c2de35",
+        "android_client_info": {
+          "package_name": "com.uddoktahisab.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBLri_ykHwV0IyofbvOilSzoVOOy5hXCP0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

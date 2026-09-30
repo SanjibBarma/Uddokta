@@ -12,6 +12,9 @@ import androidx.lifecycle.SavedStateHandle;
 import androidx.lifecycle.ViewModel;
 import androidx.work.ListenableWorker;
 import androidx.work.WorkerParameters;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.gson.Gson;
 import com.uddoktahisab.app.data.local.LocalStore;
 import com.uddoktahisab.app.data.local.NetworkMonitor;
@@ -19,6 +22,7 @@ import com.uddoktahisab.app.data.local.SessionManager;
 import com.uddoktahisab.app.data.local.db.AppDatabase;
 import com.uddoktahisab.app.data.local.db.LocalDao;
 import com.uddoktahisab.app.data.remote.ApiService;
+import com.uddoktahisab.app.data.remote.FirebaseDataSource;
 import com.uddoktahisab.app.data.repository.AppRepository;
 import com.uddoktahisab.app.di.AppModule_ApiFactory;
 import com.uddoktahisab.app.di.AppModule_DaoFactory;
@@ -51,7 +55,6 @@ import dagger.internal.LazyClassKeyMap;
 import dagger.internal.Preconditions;
 import dagger.internal.Provider;
 import dagger.internal.SingleCheck;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.processing.Generated;
@@ -389,7 +392,7 @@ public final class DaggerUddoktaApp_HiltComponents_SingletonC {
 
     @Override
     public Map<Class<?>, Boolean> getViewModelKeys() {
-      return LazyClassKeyMap.<Boolean>of(Collections.<String, Boolean>singletonMap(LazyClassKeyProvider.com_uddoktahisab_app_viewmodel_AppViewModel, AppViewModel_HiltModules.KeyModule.provide()));
+      return LazyClassKeyMap.<Boolean>of(ImmutableMap.<String, Boolean>of(LazyClassKeyProvider.com_uddoktahisab_app_viewmodel_AppViewModel, AppViewModel_HiltModules.KeyModule.provide()));
     }
 
     @Override
@@ -443,12 +446,12 @@ public final class DaggerUddoktaApp_HiltComponents_SingletonC {
 
     @Override
     public Map<Class<?>, javax.inject.Provider<ViewModel>> getHiltViewModelMap() {
-      return LazyClassKeyMap.<javax.inject.Provider<ViewModel>>of(Collections.<String, javax.inject.Provider<ViewModel>>singletonMap(LazyClassKeyProvider.com_uddoktahisab_app_viewmodel_AppViewModel, ((Provider) appViewModelProvider)));
+      return LazyClassKeyMap.<javax.inject.Provider<ViewModel>>of(ImmutableMap.<String, javax.inject.Provider<ViewModel>>of(LazyClassKeyProvider.com_uddoktahisab_app_viewmodel_AppViewModel, ((Provider) appViewModelProvider)));
     }
 
     @Override
     public Map<Class<?>, Object> getHiltViewModelAssistedMap() {
-      return Collections.<Class<?>, Object>emptyMap();
+      return ImmutableMap.<Class<?>, Object>of();
     }
 
     @IdentifierNameString
@@ -567,6 +570,8 @@ public final class DaggerUddoktaApp_HiltComponents_SingletonC {
 
     private Provider<ApiService> apiProvider;
 
+    private Provider<FirebaseDataSource> firebaseDataSourceProvider;
+
     private Provider<SessionManager> sessionManagerProvider;
 
     private Provider<AppDatabase> databaseProvider;
@@ -591,7 +596,7 @@ public final class DaggerUddoktaApp_HiltComponents_SingletonC {
 
     private Map<String, javax.inject.Provider<WorkerAssistedFactory<? extends ListenableWorker>>> mapOfStringAndProviderOfWorkerAssistedFactoryOf(
         ) {
-      return Collections.<String, javax.inject.Provider<WorkerAssistedFactory<? extends ListenableWorker>>>singletonMap("com.uddoktahisab.app.worker.PendingSyncWorker", ((Provider) pendingSyncWorker_AssistedFactoryProvider));
+      return ImmutableMap.<String, javax.inject.Provider<WorkerAssistedFactory<? extends ListenableWorker>>>of("com.uddoktahisab.app.worker.PendingSyncWorker", ((Provider) pendingSyncWorker_AssistedFactoryProvider));
     }
 
     private HiltWorkerFactory hiltWorkerFactory() {
@@ -602,10 +607,11 @@ public final class DaggerUddoktaApp_HiltComponents_SingletonC {
     private void initialize(final ApplicationContextModule applicationContextModuleParam) {
       this.gsonProvider = DoubleCheck.provider(new SwitchingProvider<Gson>(singletonCImpl, 3));
       this.apiProvider = DoubleCheck.provider(new SwitchingProvider<ApiService>(singletonCImpl, 2));
-      this.sessionManagerProvider = DoubleCheck.provider(new SwitchingProvider<SessionManager>(singletonCImpl, 4));
-      this.databaseProvider = DoubleCheck.provider(new SwitchingProvider<AppDatabase>(singletonCImpl, 6));
-      this.localStoreProvider = DoubleCheck.provider(new SwitchingProvider<LocalStore>(singletonCImpl, 5));
-      this.networkMonitorProvider = DoubleCheck.provider(new SwitchingProvider<NetworkMonitor>(singletonCImpl, 7));
+      this.firebaseDataSourceProvider = DoubleCheck.provider(new SwitchingProvider<FirebaseDataSource>(singletonCImpl, 4));
+      this.sessionManagerProvider = DoubleCheck.provider(new SwitchingProvider<SessionManager>(singletonCImpl, 5));
+      this.databaseProvider = DoubleCheck.provider(new SwitchingProvider<AppDatabase>(singletonCImpl, 7));
+      this.localStoreProvider = DoubleCheck.provider(new SwitchingProvider<LocalStore>(singletonCImpl, 6));
+      this.networkMonitorProvider = DoubleCheck.provider(new SwitchingProvider<NetworkMonitor>(singletonCImpl, 8));
       this.appRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<AppRepository>(singletonCImpl, 1));
       this.pendingSyncWorker_AssistedFactoryProvider = SingleCheck.provider(new SwitchingProvider<PendingSyncWorker_AssistedFactory>(singletonCImpl, 0));
     }
@@ -617,7 +623,7 @@ public final class DaggerUddoktaApp_HiltComponents_SingletonC {
 
     @Override
     public Set<Boolean> getDisableFragmentGetContextFix() {
-      return Collections.<Boolean>emptySet();
+      return ImmutableSet.<Boolean>of();
     }
 
     @Override
@@ -630,6 +636,7 @@ public final class DaggerUddoktaApp_HiltComponents_SingletonC {
       return new ServiceCBuilder(singletonCImpl);
     }
 
+    @CanIgnoreReturnValue
     private UddoktaApp injectUddoktaApp2(UddoktaApp instance) {
       UddoktaApp_MembersInjector.injectWorkerFactory(instance, hiltWorkerFactory());
       return instance;
@@ -658,7 +665,7 @@ public final class DaggerUddoktaApp_HiltComponents_SingletonC {
           };
 
           case 1: // com.uddoktahisab.app.data.repository.AppRepository 
-          return (T) new AppRepository(singletonCImpl.apiProvider.get(), singletonCImpl.sessionManagerProvider.get(), singletonCImpl.localStoreProvider.get(), singletonCImpl.networkMonitorProvider.get(), ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
+          return (T) new AppRepository(singletonCImpl.apiProvider.get(), singletonCImpl.firebaseDataSourceProvider.get(), singletonCImpl.sessionManagerProvider.get(), singletonCImpl.localStoreProvider.get(), singletonCImpl.networkMonitorProvider.get(), ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
 
           case 2: // com.uddoktahisab.app.data.remote.ApiService 
           return (T) AppModule_ApiFactory.api(singletonCImpl.gsonProvider.get());
@@ -666,16 +673,19 @@ public final class DaggerUddoktaApp_HiltComponents_SingletonC {
           case 3: // com.google.gson.Gson 
           return (T) AppModule_GsonFactory.gson();
 
-          case 4: // com.uddoktahisab.app.data.local.SessionManager 
+          case 4: // com.uddoktahisab.app.data.remote.FirebaseDataSource 
+          return (T) new FirebaseDataSource(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
+
+          case 5: // com.uddoktahisab.app.data.local.SessionManager 
           return (T) new SessionManager(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
 
-          case 5: // com.uddoktahisab.app.data.local.LocalStore 
+          case 6: // com.uddoktahisab.app.data.local.LocalStore 
           return (T) new LocalStore(singletonCImpl.localDao(), singletonCImpl.gsonProvider.get());
 
-          case 6: // com.uddoktahisab.app.data.local.db.AppDatabase 
+          case 7: // com.uddoktahisab.app.data.local.db.AppDatabase 
           return (T) AppModule_DatabaseFactory.database(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
 
-          case 7: // com.uddoktahisab.app.data.local.NetworkMonitor 
+          case 8: // com.uddoktahisab.app.data.local.NetworkMonitor 
           return (T) new NetworkMonitor(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
 
           default: throw new AssertionError(id);

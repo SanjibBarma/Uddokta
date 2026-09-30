@@ -84,35 +84,35 @@ fun LoginScreen(error: String?, onLogin: (String, String) -> Unit, onClear: () -
                 Text("ইউজারনেম ও পাসওয়ার্ড দিয়ে প্রবেশ করুন", color = MaterialTheme.colorScheme.onSurfaceVariant);
 
                 OutlinedTextField(
-                user,
-                { user = it; onClear() },
-                Modifier.fillMaxWidth(),
-                label = { Text("ইউজারনেম") },
-                leadingIcon = { Icon(Icons.Rounded.Person, null) },
-                singleLine = true,
-                shape = RoundedCornerShape(16.dp)
+                    user,
+                    { user = it; onClear() },
+                    Modifier.fillMaxWidth(),
+                    label = { Text("ইউজারনেম") },
+                    leadingIcon = { Icon(Icons.Rounded.Person, null) },
+                    singleLine = true,
+                    shape = RoundedCornerShape(16.dp)
                 );
 
                 OutlinedTextField(
-                pass,
-                { pass = it; onClear() },
-                Modifier.fillMaxWidth(),
-                label = { Text("পাসওয়ার্ড") },
-                leadingIcon = { Icon(Icons.Rounded.Lock, null) },
-                trailingIcon = {
-                    IconButton({
-                        visible = !visible
-                    }) {
-                        Icon(
-                            if (visible) Icons.Rounded.VisibilityOff else Icons.Rounded.Visibility,
-                            null
-                        )
-                    }
-                },
-                visualTransformation = if (visible) VisualTransformation.None else PasswordVisualTransformation(),
-                singleLine = true,
-                shape = RoundedCornerShape(16.dp)
-            ); if (error != null) Text(
+                    pass,
+                    { pass = it; onClear() },
+                    Modifier.fillMaxWidth(),
+                    label = { Text("পাসওয়ার্ড") },
+                    leadingIcon = { Icon(Icons.Rounded.Lock, null) },
+                    trailingIcon = {
+                        IconButton({
+                            visible = !visible
+                        }) {
+                            Icon(
+                                if (visible) Icons.Rounded.VisibilityOff else Icons.Rounded.Visibility,
+                                null
+                            )
+                        }
+                    },
+                    visualTransformation = if (visible) VisualTransformation.None else PasswordVisualTransformation(),
+                    singleLine = true,
+                    shape = RoundedCornerShape(16.dp)
+                ); if (error != null) Text(
                 error,
                 color = MaterialTheme.colorScheme.error
             ); Button(

@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.EditNote
@@ -37,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.uddoktahisab.app.data.model.SaleRecord
@@ -72,7 +74,11 @@ private fun getBanglaDay(date: String): String {
 }
 
 @Composable
-private fun HistoryRecordCard(r: SaleRecord, onEdit: (() -> Unit)? = null) {
+private fun HistoryRecordCard(
+    r: SaleRecord,
+    isAdmin: Boolean = false,
+    onEdit: (() -> Unit)? = null
+) {
     val dateTime = remember(r.date, r.createdAt) { formatDateTime(r.date, r.createdAt) }
     val bar = remember(r.date) { getBanglaDay(r.date) }
 
@@ -82,12 +88,19 @@ private fun HistoryRecordCard(r: SaleRecord, onEdit: (() -> Unit)? = null) {
     ) {
         Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                if (isAdmin && r.userName.isNotBlank()) {
+                    Text("বিক্রেতা: ${r.userName}", fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                }
+                if (r.taskName.isNotBlank()) {
+                    Text("কাজ: ${r.taskName}", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                }
                 Text("তারিখ: $dateTime", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Text("বার/দিন: $bar", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Text("পরিমাণ: ${number(r.quantity)} ${r.unit}", fontSize = 13.sp)
                 Text("একক মূল্য: ${money(r.unitPrice)}", fontSize = 13.sp)
                 Text("নোট: ${r.note}", fontSize = 13.sp)
-                Text("মোট মূল্য: ${money(r.total)}",
+                Text(
+                    "মোট মূল্য: ${money(r.total)}",
                     fontWeight = FontWeight.ExtraBold,
                     fontSize = 16.sp,
                     color = MaterialTheme.colorScheme.primary
@@ -133,6 +146,7 @@ fun HistoryScreen(
         items(records) { r ->
             HistoryRecordCard(
                 r = r,
+                isAdmin = isAdmin,
                 onEdit = if (isAdmin) null else { { editing = r } }
             )
         }
@@ -164,18 +178,31 @@ private fun ChangeDialog(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(9.dp)
             ) {
-                OutlinedTextField(q, { q = it }, label = { Text("নতুন পরিমাণ") })
-                OutlinedTextField(p, { p = it }, label = { Text("নতুন মূল্য") })
+                OutlinedTextField(
+                    value = q,
+                    onValueChange = { q = it },
+                    label = { Text("নতুন পরিমাণ") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+                )
+                OutlinedTextField(
+                    value = p,
+                    onValueChange = { p = it },
+                    label = { Text("নতুন মূল্য") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+                )
                 OutlinedTextField(n, { n = it }, label = { Text("নতুন নোট") })
                 OutlinedTextField(reason, { reason = it }, label = { Text("পরিবর্তনের কারণ*") })
             }
         },
         confirmButton = {
-            Button({
-                keyboard?.hide()
-                focus.clearFocus(force = true)
-                onSend(q.toDoubleOrNull() ?: 0.0, p.toDoubleOrNull() ?: 0.0, n, reason)
-            }, enabled = reason.isNotBlank()) { Text("রিকোয়েস্ট পাঠান") }
+            Button(
+                {
+                    keyboard?.hide()
+                    focus.clearFocus(force = true)
+                    onSend(q.toDoubleOrNull() ?: 0.0, p.toDoubleOrNull() ?: 0.0, n, reason)
+                },
+                enabled = reason.isNotBlank() && (q.toDoubleOrNull() ?: 0.0) > 0.0 && (p.toDoubleOrNull() ?: -1.0) >= 0.0
+            ) { Text("রিকোয়েস্ট পাঠান") }
         },
         dismissButton = { TextButton(onDismiss) { Text("বাতিল") } }
     )

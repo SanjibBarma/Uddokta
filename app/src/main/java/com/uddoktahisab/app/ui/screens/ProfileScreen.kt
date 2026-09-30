@@ -3,11 +3,13 @@ package com.uddoktahisab.app.ui.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -19,6 +21,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,20 +45,26 @@ fun ProfileScreen(
     locked: Boolean,
     onLogout: () -> Unit
 ) {
-    var name by remember { mutableStateOf(user?.fullName.orEmpty()) };
-    var present by remember { mutableStateOf(user?.presentAddress.orEmpty()) };
-    var permanent by remember { mutableStateOf(user?.permanentAddress.orEmpty()) };
-    var phone by remember { mutableStateOf(user?.phone.orEmpty()) };
-    var father by remember { mutableStateOf(user?.fatherPhone.orEmpty()) };
-    var nid by remember { mutableStateOf(user?.nid.orEmpty()) }
+    var name by remember(user?.fullName) { mutableStateOf(user?.fullName.orEmpty()) }
+    var present by remember(user?.presentAddress) { mutableStateOf(user?.presentAddress.orEmpty()) }
+    var permanent by remember(user?.permanentAddress) { mutableStateOf(user?.permanentAddress.orEmpty()) }
+    var phone by remember(user?.phone) { mutableStateOf(user?.phone.orEmpty()) }
+    var father by remember(user?.fatherPhone) { mutableStateOf(user?.fatherPhone.orEmpty()) }
+    var nid by remember(user?.nid) { mutableStateOf(user?.nid.orEmpty()) }
     val valid = listOf(name, present, permanent, phone, father, nid).all { it.isNotBlank() }
-    val keyboard = LocalSoftwareKeyboardController.current  // ← যোগ
+    val keyboard = LocalSoftwareKeyboardController.current
     val focus = LocalFocusManager.current
-    Scaffold(topBar = {
-        TopAppBar(
-            title = { BrandMark(true) },
-            actions = { TextButton(onLogout) { Text("লগআউট") } })
-    }) { pad ->
+
+    Scaffold(
+        contentWindowInsets = if (locked) WindowInsets.safeDrawing else WindowInsets(0, 0, 0, 0),
+        topBar = {
+            TopAppBar(
+                title = { BrandMark(true) },
+                actions = { TextButton(onLogout) { Text("লগআউট") } },
+                windowInsets = if (locked) TopAppBarDefaults.windowInsets else WindowInsets(0, 0, 0, 0)
+            )
+        }
+    ) { pad ->
         LazyColumn(
             Modifier
                 .fillMaxSize()
@@ -66,53 +75,64 @@ fun ProfileScreen(
             contentPadding = PaddingValues(bottom = 32.dp)
         ) {
             item {
-                Spacer(Modifier.height(8.dp)); Text(
-                if (locked) "প্রোফাইল ১০০% সম্পন্ন করুন" else "আমার প্রোফাইল",
-                fontSize = 27.sp,
-                fontWeight = FontWeight.ExtraBold
-            ); Text(
-                "সব তথ্য পূরণ না করা পর্যন্ত অন্য কোনো ফিচার দেখা যাবে না।",
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                fontSize = 12.sp
-            )
-            }; item {
-            ProfileField("পূর্ণ নাম", name, enabled = locked) {
-                name = it
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    if (locked) "প্রোফাইল ১০০% সম্পন্ন করুন" else "আমার প্রোফাইল",
+                    fontSize = 27.sp,
+                    fontWeight = FontWeight.ExtraBold
+                )
+                Text(
+                    "সব তথ্য পূরণ না করা পর্যন্ত অন্য কোনো ফিচার দেখা যাবে না।",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 12.sp
+                )
             }
-        }; item {
-            ProfileField("বর্তমান ঠিকানা", present, enabled = locked) {
-                present = it
+            item {
+                ProfileField("পূর্ণ নাম", name, enabled = locked) {
+                    name = it
+                }
             }
-        }; item {
-            ProfileField("স্থায়ী ঠিকানা", permanent, enabled = locked) {
-                permanent = it
+            item {
+                ProfileField("বর্তমান ঠিকানা", present, enabled = locked) {
+                    present = it
+                }
             }
-        }; item {
-            ProfileField("ফোন নম্বর", phone, KeyboardType.Phone, locked) {
-                phone = it
+            item {
+                ProfileField("স্থায়ী ঠিকানা", permanent, enabled = locked) {
+                    permanent = it
+                }
             }
-        }; item {
-            ProfileField("বাবার ফোন নম্বর", father, KeyboardType.Phone, locked) {
-                father = it
+            item {
+                ProfileField("ফোন নম্বর", phone, KeyboardType.Phone, locked) {
+                    phone = it
+                }
             }
-        }; item {
-            ProfileField("জাতীয় পরিচয়পত্র নম্বর", nid, KeyboardType.Number, locked) {
-                nid = it
+            item {
+                ProfileField("বাবার ফোন নম্বর", father, KeyboardType.Phone, locked) {
+                    father = it
+                }
             }
-        }; if (locked) item {
-            Button(
-                {
-                    keyboard?.hide()
-                    focus.clearFocus(force = true)
-                    onSave(name, present, permanent, phone, father, nid)
-                },
-                Modifier
-                    .fillMaxWidth()
-                    .height(54.dp),
-                enabled = valid,
-                shape = RoundedCornerShape(16.dp)
-            ) { Text("প্রোফাইল সম্পন্ন করুন") }
-        }
+            item {
+                ProfileField("জাতীয় পরিচয়পত্র নম্বর", nid, KeyboardType.Number, locked) {
+                    nid = it
+                }
+            }
+            if (locked) {
+                item {
+                    Button(
+                        {
+                            keyboard?.hide()
+                            focus.clearFocus(force = true)
+                            onSave(name, present, permanent, phone, father, nid)
+                        },
+                        Modifier
+                            .fillMaxWidth()
+                            .height(54.dp),
+                        enabled = valid,
+                        shape = RoundedCornerShape(16.dp)
+                    ) { Text("প্রোফাইল সম্পন্ন করুন") }
+                }
+            }
         }
     }
 }

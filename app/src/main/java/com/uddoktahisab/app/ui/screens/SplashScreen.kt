@@ -59,7 +59,6 @@ fun SplashScreen() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .systemBarsPadding()
             .background(
                 Brush.verticalGradient(
                     listOf(
@@ -68,7 +67,8 @@ fun SplashScreen() {
                         MaterialTheme.colorScheme.background
                     )
                 )
-            ),
+            )
+            .systemBarsPadding(),
         contentAlignment = Alignment.Center
     ) {
         Column(

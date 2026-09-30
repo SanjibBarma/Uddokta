@@ -2,9 +2,11 @@ package com.uddoktahisab.app.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.firestore.ListenerRegistration
 import com.uddoktahisab.app.data.model.*
 import com.uddoktahisab.app.data.repository.AppRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -26,23 +28,53 @@ data class AppUiState(
 
 @HiltViewModel
 class AppViewModel @Inject constructor(private val repo: AppRepository) : ViewModel() {
-    private val _state = MutableStateFlow(AppUiState());
+    private val _state = MutableStateFlow(AppUiState())
     val state = _state.asStateFlow()
+
+    private var realtimeListeners: List<ListenerRegistration> = emptyList()
+    private var realtimeRefreshJob: Job? = null
 
     init {
         viewModelScope.launch {
-            if (repo.hasSession()) refresh() else {
-                runCatching { repo.initialize() }; _state.value =
-                    AppUiState(loading = false, offline = !repo.isOnline())
+            if (repo.hasSession()) {
+                refresh()
+                attachRealtimeIfNeeded()
+            } else {
+                runCatching { repo.initialize() }
+                _state.value = AppUiState(loading = false, offline = !repo.isOnline())
             }
         }
-        // ─── Background polling: লগইন থাকা অবস্থায় প্রতি 60 সেকেন্ডে fresh data আনে ───
+        // ─── Background polling + pending sync ───
         startBackgroundPolling()
     }
 
+    private fun attachRealtimeIfNeeded() {
+        if (realtimeListeners.isNotEmpty()) return
+        realtimeListeners = repo.observeRealtime {
+            val s = _state.value
+            if (!s.loggedIn || s.loading) return@observeRealtime
+            realtimeRefreshJob?.cancel()
+            realtimeRefreshJob = viewModelScope.launch {
+                delay(350L) // debounce rapid Firestore snapshot events
+                runCatching { repo.remoteBootstrap() }.onSuccess { fresh ->
+                    _state.value = _state.value.copy(
+                        data = fresh,
+                        loading = false,
+                        offline = false
+                    )
+                }
+            }
+        }
+    }
+
+    private fun detachRealtime() {
+        realtimeRefreshJob?.cancel()
+        realtimeListeners.forEach { runCatching { it.remove() } }
+        realtimeListeners = emptyList()
+    }
+
     /**
-     * Foreground-এ থাকা অবস্থায় প্রতি 60 সেকেন্ডে server থেকে fresh data আনে।
-     * কোনো user/profile/sale পরিবর্তন হলে dashboard স্বয়ংক্রিয়ভাবে আপডেট হবে।
+     * Foreground-এ থাকা অবস্থায় প্রতি 60 সেকেন্ডে fresh data ও pending sync নিশ্চিত করে।
      */
     private fun startBackgroundPolling() {
         viewModelScope.launch {
@@ -70,6 +102,7 @@ class AppViewModel @Inject constructor(private val repo: AppRepository) : ViewMo
             }
         }.onSuccess {
             _state.value = AppUiState(false, true, it, offline = false)
+            attachRealtimeIfNeeded()
         }.onFailure {
             val msg =
                 if (it is TimeoutCancellationException) "লগইন সময় শেষ। আবার চেষ্টা করুন।" else it.message
@@ -80,27 +113,34 @@ class AppViewModel @Inject constructor(private val repo: AppRepository) : ViewMo
     fun refresh() = viewModelScope.launch {
         val cached = repo.cachedBootstrap()
         if (cached != null) {
-            // selectedTab সংরক্ষণ করি যাতে refresh করলে user যেখানে ছিল সেখানেই থাকে
             _state.value = _state.value.copy(
                 loggedIn = true,
                 data = cached,
                 offline = !repo.isOnline(),
                 loading = false
             )
-        } else _state.value = _state.value.copy(loading = true, error = null)
-        if (repo.isOnline()) runCatching { repo.remoteBootstrap() }.onSuccess { fresh ->
+        } else {
+            _state.value = _state.value.copy(loading = true, error = null)
+        }
+        if (repo.isOnline()) {
+            runCatching { repo.remoteBootstrap() }.onSuccess { fresh ->
+                _state.value = _state.value.copy(
+                    loggedIn = true,
+                    data = fresh,
+                    loading = false,
+                    offline = false
+                )
+                attachRealtimeIfNeeded()
+            }.onFailure {
+                _state.value = _state.value.copy(loading = false, error = it.message)
+            }
+        } else {
             _state.value = _state.value.copy(
-                loggedIn = true,
-                data = fresh,
                 loading = false,
-                offline = false
+                offline = true,
+                error = if (cached == null) "ইন্টারনেট নেই এবং কোনো offline data পাওয়া যায়নি" else null
             )
-        }.onFailure { _state.value = _state.value.copy(loading = false, error = it.message) }
-        else _state.value = _state.value.copy(
-            loading = false,
-            offline = true,
-            error = if (cached == null) "ইন্টারনেট নেই এবং কোনো offline data পাওয়া যায়নি" else null
-        )
+        }
     }
 
     fun completeProfile(
@@ -164,15 +204,15 @@ class AppViewModel @Inject constructor(private val repo: AppRepository) : ViewMo
         unit: String = "kg",
         totalStock: Double = 0.0,
         totalCost: Double = 0.0
-    ) =
-        action(
-            "addSku", mapOf(
-                "name" to name,
-                "unit" to unit,
-                "totalStock" to totalStock,
-                "totalCost" to totalCost
-            )
+    ) = action(
+        "addSku",
+        mapOf(
+            "name" to name,
+            "unit" to unit,
+            "totalStock" to totalStock,
+            "totalCost" to totalCost
         )
+    )
 
     fun addPurchase(skuId: String, quantity: Double, cost: Double) =
         action("addPurchase", mapOf("skuId" to skuId, "quantity" to quantity, "cost" to cost))
@@ -185,9 +225,6 @@ class AppViewModel @Inject constructor(private val repo: AppRepository) : ViewMo
         runCatching {
             repo.action(name, payload)
         }.onSuccess { message ->
-            // Optimistic cache (repo.action() এ local.optimistic() দিয়ে আপডেট হয়েছে) —
-            // extra remoteBootstrap() skip করায় action অনেক দ্রুত সম্পন্ন হয়।
-            // সব save/edit-এর পর ড্যাশবোর্ডে redirect।
             val cached = repo.cachedBootstrap()
             _state.value = _state.value.copy(
                 loading = false,
@@ -213,8 +250,14 @@ class AppViewModel @Inject constructor(private val repo: AppRepository) : ViewMo
     }
 
     fun logout() = viewModelScope.launch {
-        _state.value =
-            _state.value.copy(loading = true, error = null); repo.logout(); _state.value =
-        AppUiState(loading = false)
+        detachRealtime()
+        _state.value = _state.value.copy(loading = true, error = null)
+        repo.logout()
+        _state.value = AppUiState(loading = false)
+    }
+
+    override fun onCleared() {
+        detachRealtime()
+        super.onCleared()
     }
 }
