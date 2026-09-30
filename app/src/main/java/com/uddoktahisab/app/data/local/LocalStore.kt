@@ -60,16 +60,88 @@ class LocalStore @Inject constructor(private val dao: LocalDao, private val gson
                 )
                 val d = old.dashboard
                 val today = r.date == LocalDate.now().toString()
-                val month = r.date.startsWith(LocalDate.now().toString().take(7))
+                val newSelfDash = d.copy(
+                    todayQuantity = d.todayQuantity + (if (today) q else 0.0),
+                    todaySales = d.todaySales + (if (today) r.total else 0.0),
+                    monthQuantity = d.monthQuantity + q,
+                    monthSales = d.monthSales + r.total,
+                    recordCount = d.recordCount + 1,
+                    recentRecords = listOf(r) + d.recentRecords
+                )
+                val newSummaries = old.userSummaries.map { s ->
+                    if (s.user.id == old.user.id) s.copy(dashboard = newSelfDash) else s
+                }
                 old.copy(
-                    dashboard = d.copy(
-                        todayQuantity = d.todayQuantity + (if (today) q else 0.0),
-                        todaySales = d.todaySales + (if (today) r.total else 0.0),
-                        monthQuantity = d.monthQuantity + (if (month) q else 0.0),
-                        monthSales = d.monthSales + (if (month) r.total else 0.0),
-                        recordCount = d.recordCount + 1,
-                        recentRecords = listOf(r) + d.recentRecords
+                    dashboard = newSelfDash,
+                    userSummaries = newSummaries
+                )
+            }
+
+            "deleteRecord" -> {
+                val recId = p["recordId"]?.toString().orEmpty()
+                val todayStr = LocalDate.now().toString()
+
+                // Find the record to know its unit, quantity, and total for SKU recalculation
+                val targetRec = (old.userSummaries.flatMap { it.dashboard.recentRecords } + old.dashboard.recentRecords)
+                    .find { it.id == recId }
+
+                fun removeFromDashboard(d: Dashboard): Dashboard {
+                    val removed = d.recentRecords.find { it.id == recId } ?: return d
+                    val remaining = d.recentRecords.filterNot { it.id == recId }
+                    if (d.recordCount <= d.recentRecords.size) {
+                        var tq = 0.0
+                        var ts = 0.0
+                        var mq = 0.0
+                        var ms = 0.0
+                        for (r in remaining) {
+                            if (r.date == todayStr) {
+                                tq += r.quantity
+                                ts += r.total
+                            }
+                            mq += r.quantity
+                            ms += r.total
+                        }
+                        return d.copy(
+                            todayQuantity = tq,
+                            todaySales = ts,
+                            monthQuantity = mq,
+                            monthSales = ms,
+                            recordCount = remaining.size,
+                            recentRecords = remaining
+                        )
+                    }
+                    val isToday = removed.date == todayStr
+                    return d.copy(
+                        todayQuantity = (d.todayQuantity - (if (isToday) removed.quantity else 0.0)).coerceAtLeast(0.0),
+                        todaySales = (d.todaySales - (if (isToday) removed.total else 0.0)).coerceAtLeast(0.0),
+                        monthQuantity = (d.monthQuantity - removed.quantity).coerceAtLeast(0.0),
+                        monthSales = (d.monthSales - removed.total).coerceAtLeast(0.0),
+                        recordCount = (d.recordCount - 1).coerceAtLeast(0),
+                        recentRecords = remaining
                     )
+                }
+
+                val newSkus = if (targetRec != null && old.skus != null) {
+                    old.skus.map { s ->
+                        if (s.unit == targetRec.unit) {
+                            val newSold = (s.totalSold - targetRec.quantity).coerceAtLeast(0.0)
+                            val newRev = (s.totalRevenue - targetRec.total).coerceAtLeast(0.0)
+                            s.copy(
+                                totalSold = newSold,
+                                remaining = (s.totalStock - newSold).coerceAtLeast(0.0),
+                                totalRevenue = newRev,
+                                profit = newRev - s.totalCost
+                            )
+                        } else s
+                    }
+                } else old.skus
+
+                old.copy(
+                    dashboard = removeFromDashboard(old.dashboard),
+                    userSummaries = old.userSummaries.map { s ->
+                        s.copy(dashboard = removeFromDashboard(s.dashboard))
+                    },
+                    skus = newSkus
                 )
             }
 
@@ -95,6 +167,15 @@ class LocalStore @Inject constructor(private val dao: LocalDao, private val gson
                     username = p["username"].toString()
                 )
                 old.copy(users = old.users + u)
+            }
+
+            "deleteUser" -> {
+                val uid = p["userId"]?.toString().orEmpty()
+                old.copy(
+                    users = old.users.filterNot { it.id == uid },
+                    assignments = old.assignments.filterNot { it.userId == uid },
+                    userSummaries = old.userSummaries.filterNot { it.user.id == uid }
+                )
             }
 
             "assignTasks" -> {

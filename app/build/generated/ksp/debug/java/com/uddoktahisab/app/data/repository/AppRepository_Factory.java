@@ -4,7 +4,6 @@ import android.content.Context;
 import com.uddoktahisab.app.data.local.LocalStore;
 import com.uddoktahisab.app.data.local.NetworkMonitor;
 import com.uddoktahisab.app.data.local.SessionManager;
-import com.uddoktahisab.app.data.remote.ApiService;
 import com.uddoktahisab.app.data.remote.FirebaseDataSource;
 import dagger.internal.DaggerGenerated;
 import dagger.internal.Factory;
@@ -29,8 +28,6 @@ import javax.inject.Provider;
     "deprecation"
 })
 public final class AppRepository_Factory implements Factory<AppRepository> {
-  private final Provider<ApiService> apiProvider;
-
   private final Provider<FirebaseDataSource> firebaseProvider;
 
   private final Provider<SessionManager> sessionProvider;
@@ -41,11 +38,9 @@ public final class AppRepository_Factory implements Factory<AppRepository> {
 
   private final Provider<Context> contextProvider;
 
-  public AppRepository_Factory(Provider<ApiService> apiProvider,
-      Provider<FirebaseDataSource> firebaseProvider, Provider<SessionManager> sessionProvider,
-      Provider<LocalStore> localProvider, Provider<NetworkMonitor> networkProvider,
-      Provider<Context> contextProvider) {
-    this.apiProvider = apiProvider;
+  public AppRepository_Factory(Provider<FirebaseDataSource> firebaseProvider,
+      Provider<SessionManager> sessionProvider, Provider<LocalStore> localProvider,
+      Provider<NetworkMonitor> networkProvider, Provider<Context> contextProvider) {
     this.firebaseProvider = firebaseProvider;
     this.sessionProvider = sessionProvider;
     this.localProvider = localProvider;
@@ -55,18 +50,17 @@ public final class AppRepository_Factory implements Factory<AppRepository> {
 
   @Override
   public AppRepository get() {
-    return newInstance(apiProvider.get(), firebaseProvider.get(), sessionProvider.get(), localProvider.get(), networkProvider.get(), contextProvider.get());
+    return newInstance(firebaseProvider.get(), sessionProvider.get(), localProvider.get(), networkProvider.get(), contextProvider.get());
   }
 
-  public static AppRepository_Factory create(Provider<ApiService> apiProvider,
-      Provider<FirebaseDataSource> firebaseProvider, Provider<SessionManager> sessionProvider,
-      Provider<LocalStore> localProvider, Provider<NetworkMonitor> networkProvider,
-      Provider<Context> contextProvider) {
-    return new AppRepository_Factory(apiProvider, firebaseProvider, sessionProvider, localProvider, networkProvider, contextProvider);
+  public static AppRepository_Factory create(Provider<FirebaseDataSource> firebaseProvider,
+      Provider<SessionManager> sessionProvider, Provider<LocalStore> localProvider,
+      Provider<NetworkMonitor> networkProvider, Provider<Context> contextProvider) {
+    return new AppRepository_Factory(firebaseProvider, sessionProvider, localProvider, networkProvider, contextProvider);
   }
 
-  public static AppRepository newInstance(ApiService api, FirebaseDataSource firebase,
-      SessionManager session, LocalStore local, NetworkMonitor network, Context context) {
-    return new AppRepository(api, firebase, session, local, network, context);
+  public static AppRepository newInstance(FirebaseDataSource firebase, SessionManager session,
+      LocalStore local, NetworkMonitor network, Context context) {
+    return new AppRepository(firebase, session, local, network, context);
   }
 }

@@ -11,10 +11,17 @@ enum class Role {
 }
 
 data class User(
-    val id: String = "", val username: String = "", val role: Role = Role.USER,
-    val fullName: String = "", val presentAddress: String = "", val permanentAddress: String = "",
-    val phone: String = "", val fatherPhone: String = "", val nid: String = "",
-    val profileComplete: Boolean = false, val active: Boolean = true
+    val id: String = "",
+    val username: String = "",
+    val role: Role = Role.USER,
+    val fullName: String = "",
+    val presentAddress: String = "",
+    val permanentAddress: String = "",
+    val phone: String = "",
+    val fatherPhone: String = "",
+    val nid: String = "",
+    val profileComplete: Boolean = false,
+    val active: Boolean = true
 )
 
 data class Task(
@@ -62,20 +69,11 @@ data class ChangeRequest(
 )
 
 data class LoginData(val token: String, val user: User)
-data class ApiRequest(
-    val action: String,
-    val token: String? = null,
-    val payload: Map<String, Any?> = emptyMap()
-)
-
-data class ApiResponse<T>(
-    val success: Boolean = false,
-    val message: String = "",
-    val data: T? = null
-)
 
 data class Assignment(val userId: String = "", val taskId: String = "", val active: Boolean = true)
+
 data class UserSummary(val user: User = User(), val dashboard: Dashboard = Dashboard())
+
 data class Sku(
     val id: String = "",
     val name: String = "",

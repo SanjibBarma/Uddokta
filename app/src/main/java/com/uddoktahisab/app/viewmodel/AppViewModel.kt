@@ -44,7 +44,6 @@ class AppViewModel @Inject constructor(private val repo: AppRepository) : ViewMo
                 _state.value = AppUiState(loading = false, offline = !repo.isOnline())
             }
         }
-        // ─── Background polling + pending sync ───
         startBackgroundPolling()
     }
 
@@ -55,7 +54,7 @@ class AppViewModel @Inject constructor(private val repo: AppRepository) : ViewMo
             if (!s.loggedIn || s.loading) return@observeRealtime
             realtimeRefreshJob?.cancel()
             realtimeRefreshJob = viewModelScope.launch {
-                delay(350L) // debounce rapid Firestore snapshot events
+                delay(350L)
                 runCatching { repo.remoteBootstrap() }.onSuccess { fresh ->
                     _state.value = _state.value.copy(
                         data = fresh,
@@ -73,9 +72,6 @@ class AppViewModel @Inject constructor(private val repo: AppRepository) : ViewMo
         realtimeListeners = emptyList()
     }
 
-    /**
-     * Foreground-এ থাকা অবস্থায় প্রতি 60 সেকেন্ডে fresh data ও pending sync নিশ্চিত করে।
-     */
     private fun startBackgroundPolling() {
         viewModelScope.launch {
             while (isActive) {
@@ -159,7 +155,8 @@ class AppViewModel @Inject constructor(private val repo: AppRepository) : ViewMo
             "phone" to phone,
             "fatherPhone" to fatherPhone,
             "nid" to nid
-        )
+        ),
+        redirectToDashboard = true
     )
 
     fun addSale(task: Task, date: String, qty: Double, price: Double, note: String) = action(
@@ -170,8 +167,12 @@ class AppViewModel @Inject constructor(private val repo: AppRepository) : ViewMo
             "quantity" to qty,
             "unitPrice" to price,
             "note" to note
-        )
+        ),
+        redirectToDashboard = true
     )
+
+    fun deleteRecord(recordId: String) =
+        action("deleteRecord", mapOf("recordId" to recordId), redirectToDashboard = false)
 
     fun requestChange(
         record: SaleRecord,
@@ -187,17 +188,21 @@ class AppViewModel @Inject constructor(private val repo: AppRepository) : ViewMo
             "newUnitPrice" to price,
             "newNote" to note,
             "reason" to reason
-        )
+        ),
+        redirectToDashboard = false
     )
 
     fun createUser(username: String, password: String) =
-        action("createUser", mapOf("username" to username, "password" to password))
+        action("createUser", mapOf("username" to username, "password" to password), redirectToDashboard = false)
+
+    fun deleteUser(userId: String) =
+        action("deleteUser", mapOf("userId" to userId), redirectToDashboard = false)
 
     fun assign(userId: String, taskIds: List<String>) =
-        action("assignTasks", mapOf("userId" to userId, "taskIds" to taskIds))
+        action("assignTasks", mapOf("userId" to userId, "taskIds" to taskIds), redirectToDashboard = false)
 
     fun decide(requestId: String, approve: Boolean) =
-        action("decideChangeRequest", mapOf("requestId" to requestId, "approve" to approve))
+        action("decideChangeRequest", mapOf("requestId" to requestId, "approve" to approve), redirectToDashboard = false)
 
     fun addSku(
         name: String,
@@ -211,16 +216,21 @@ class AppViewModel @Inject constructor(private val repo: AppRepository) : ViewMo
             "unit" to unit,
             "totalStock" to totalStock,
             "totalCost" to totalCost
-        )
+        ),
+        redirectToDashboard = false
     )
 
     fun addPurchase(skuId: String, quantity: Double, cost: Double) =
-        action("addPurchase", mapOf("skuId" to skuId, "quantity" to quantity, "cost" to cost))
+        action("addPurchase", mapOf("skuId" to skuId, "quantity" to quantity, "cost" to cost), redirectToDashboard = false)
 
     fun deleteSku(id: String) =
-        action("deleteSku", mapOf("id" to id))
+        action("deleteSku", mapOf("id" to id), redirectToDashboard = false)
 
-    private fun action(name: String, payload: Map<String, Any?>) = viewModelScope.launch {
+    private fun action(
+        name: String,
+        payload: Map<String, Any?>,
+        redirectToDashboard: Boolean = true
+    ) = viewModelScope.launch {
         _state.value = _state.value.copy(loading = true, error = null)
         runCatching {
             repo.action(name, payload)
@@ -232,7 +242,7 @@ class AppViewModel @Inject constructor(private val repo: AppRepository) : ViewMo
                 loggedIn = true,
                 notice = message,
                 offline = !repo.isOnline(),
-                selectedTab = 0
+                selectedTab = if (redirectToDashboard) 0 else _state.value.selectedTab
             )
         }.onFailure {
             _state.value = _state.value.copy(loading = false, error = it.message)
@@ -243,7 +253,6 @@ class AppViewModel @Inject constructor(private val repo: AppRepository) : ViewMo
         _state.value = _state.value.copy(error = null, notice = null)
     }
 
-    /** MainShell এর bottom-tab বদলায়; action success এ ড্যাশবোর্ডে ফেরাতেও ব্যবহৃত */
     fun selectTab(index: Int) {
         if (_state.value.selectedTab == index) return
         _state.value = _state.value.copy(selectedTab = index.coerceAtLeast(0))

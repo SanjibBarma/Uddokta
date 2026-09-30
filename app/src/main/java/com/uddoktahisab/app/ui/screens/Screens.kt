@@ -32,14 +32,12 @@ fun MainShell(data: BootstrapData, vm: AppViewModel) {
     }
     val page = s.selectedTab.coerceIn(0, items.lastIndex)
 
-    val historyRecords = remember(admin, data.dashboard.recentRecords, data.userSummaries) {
-        if (admin && data.userSummaries.isNotEmpty()) {
-            (data.userSummaries.flatMap { it.dashboard.recentRecords } + data.dashboard.recentRecords)
-                .distinctBy { it.id }
-                .sortedByDescending { it.createdAt.ifBlank { it.date } }
-        } else {
-            data.dashboard.recentRecords
-        }
+    // হিসাব ট্যাবে অ্যাডমিন বা সাধারণ ইউজার—সবার ক্ষেত্রেই শুধু নিজের (self) হিসাব দেখাবে, এবং সর্বশেষ (latest) এন্ট্রি সবার আগে থাকবে
+    val selfHistoryRecords = remember(data.dashboard.recentRecords) {
+        data.dashboard.recentRecords.sortedWith(
+            compareByDescending<SaleRecord> { it.createdAt }
+                .thenByDescending { it.date }
+        )
     }
 
     Scaffold(
@@ -80,7 +78,7 @@ fun MainShell(data: BootstrapData, vm: AppViewModel) {
             when (items[page].label) {
                 "ড্যাশবোর্ড" -> DashboardScreen(data, vm)
                 "বিক্রি" -> SaleScreen(data.tasks, vm::addSale)
-                "হিসাব" -> HistoryScreen(historyRecords, vm::requestChange, admin)
+                "হিসাব" -> HistoryScreen(selfHistoryRecords, vm::requestChange, admin)
                 "অ্যাডমিন" -> AdminScreen(data, vm)
                 else -> ProfileScreen(data.user, vm::completeProfile, false, vm::logout)
             }

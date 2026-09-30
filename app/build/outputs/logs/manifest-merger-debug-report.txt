@@ -111,8 +111,8 @@ MERGED from [androidx.tracing:tracing:1.2.0] C:\Users\samur\.gradle\caches\8.14.
 MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\samur\.gradle\caches\8.14.5\transforms\83f3571b95310d4ea4a0de897855581f\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:17:1-27:12
 MERGED from [com.google.firebase:firebase-components:18.0.0] C:\Users\samur\.gradle\caches\8.14.5\transforms\d97245e96a467cf8181a436546477951\transformed\firebase-components-18.0.0\AndroidManifest.xml:15:1-20:12
 MERGED from [androidx.annotation:annotation-experimental:1.4.1] C:\Users\samur\.gradle\caches\8.14.5\transforms\09f2c58cfad89a0671eb7500e3251828\transformed\annotation-experimental-1.4.1\AndroidManifest.xml:2:1-7:12
-MERGED from [com.google.dagger:dagger-lint-aar:2.52] C:\Users\samur\.gradle\caches\8.14.5\transforms\84788b3aeadf801100b1073f4ed02871\transformed\dagger-lint-aar-2.52\AndroidManifest.xml:16:1-19:12
 MERGED from [io.grpc:grpc-android:1.62.2] C:\Users\samur\.gradle\caches\8.14.5\transforms\e856e230aec93d3c4cc9b9e96b0c1b03\transformed\grpc-android-1.62.2\AndroidManifest.xml:2:1-9:12
+MERGED from [com.google.dagger:dagger-lint-aar:2.52] C:\Users\samur\.gradle\caches\8.14.5\transforms\84788b3aeadf801100b1073f4ed02871\transformed\dagger-lint-aar-2.52\AndroidManifest.xml:16:1-19:12
 MERGED from [com.google.firebase:protolite-well-known-types:18.0.0] C:\Users\samur\.gradle\caches\8.14.5\transforms\84cb68f324b12fd6252d77728b224f42\transformed\protolite-well-known-types-18.0.0\AndroidManifest.xml:2:1-11:12
 	package
 		INJECTED from D:\OWN Product\Uddokta\app\src\main\AndroidManifest.xml
@@ -400,10 +400,10 @@ MERGED from [com.google.firebase:firebase-components:18.0.0] C:\Users\samur\.gra
 MERGED from [com.google.firebase:firebase-components:18.0.0] C:\Users\samur\.gradle\caches\8.14.5\transforms\d97245e96a467cf8181a436546477951\transformed\firebase-components-18.0.0\AndroidManifest.xml:18:5-44
 MERGED from [androidx.annotation:annotation-experimental:1.4.1] C:\Users\samur\.gradle\caches\8.14.5\transforms\09f2c58cfad89a0671eb7500e3251828\transformed\annotation-experimental-1.4.1\AndroidManifest.xml:5:5-44
 MERGED from [androidx.annotation:annotation-experimental:1.4.1] C:\Users\samur\.gradle\caches\8.14.5\transforms\09f2c58cfad89a0671eb7500e3251828\transformed\annotation-experimental-1.4.1\AndroidManifest.xml:5:5-44
-MERGED from [com.google.dagger:dagger-lint-aar:2.52] C:\Users\samur\.gradle\caches\8.14.5\transforms\84788b3aeadf801100b1073f4ed02871\transformed\dagger-lint-aar-2.52\AndroidManifest.xml:18:3-42
-MERGED from [com.google.dagger:dagger-lint-aar:2.52] C:\Users\samur\.gradle\caches\8.14.5\transforms\84788b3aeadf801100b1073f4ed02871\transformed\dagger-lint-aar-2.52\AndroidManifest.xml:18:3-42
 MERGED from [io.grpc:grpc-android:1.62.2] C:\Users\samur\.gradle\caches\8.14.5\transforms\e856e230aec93d3c4cc9b9e96b0c1b03\transformed\grpc-android-1.62.2\AndroidManifest.xml:5:5-44
 MERGED from [io.grpc:grpc-android:1.62.2] C:\Users\samur\.gradle\caches\8.14.5\transforms\e856e230aec93d3c4cc9b9e96b0c1b03\transformed\grpc-android-1.62.2\AndroidManifest.xml:5:5-44
+MERGED from [com.google.dagger:dagger-lint-aar:2.52] C:\Users\samur\.gradle\caches\8.14.5\transforms\84788b3aeadf801100b1073f4ed02871\transformed\dagger-lint-aar-2.52\AndroidManifest.xml:18:3-42
+MERGED from [com.google.dagger:dagger-lint-aar:2.52] C:\Users\samur\.gradle\caches\8.14.5\transforms\84788b3aeadf801100b1073f4ed02871\transformed\dagger-lint-aar-2.52\AndroidManifest.xml:18:3-42
 MERGED from [com.google.firebase:protolite-well-known-types:18.0.0] C:\Users\samur\.gradle\caches\8.14.5\transforms\84cb68f324b12fd6252d77728b224f42\transformed\protolite-well-known-types-18.0.0\AndroidManifest.xml:7:5-9:41
 MERGED from [com.google.firebase:protolite-well-known-types:18.0.0] C:\Users\samur\.gradle\caches\8.14.5\transforms\84cb68f324b12fd6252d77728b224f42\transformed\protolite-well-known-types-18.0.0\AndroidManifest.xml:7:5-9:41
 	android:targetSdkVersion

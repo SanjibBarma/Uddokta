@@ -1,6 +1,8 @@
 package com.uddoktahisab.app.ui.screens
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,8 +26,11 @@ import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.PersonAdd
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -43,12 +48,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.uddoktahisab.app.data.model.BootstrapData
+import com.uddoktahisab.app.data.model.Role
 import com.uddoktahisab.app.data.model.Sku
 import com.uddoktahisab.app.data.model.Task
 import com.uddoktahisab.app.data.model.User
@@ -60,12 +67,15 @@ import com.uddoktahisab.app.ui.components.money
 import com.uddoktahisab.app.ui.components.number
 import com.uddoktahisab.app.viewmodel.AppViewModel
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AdminScreen(data: BootstrapData, vm: AppViewModel) {
     var tab by remember { mutableIntStateOf(0) }
     var add by remember { mutableStateOf(false) }
     var assignUser by remember { mutableStateOf<User?>(null) }
     var viewSummary by remember { mutableStateOf<UserSummary?>(null) }
+    var viewUserDetails by remember { mutableStateOf<User?>(null) }
+    var userToDelete by remember { mutableStateOf<User?>(null) }
 
     Column(
         Modifier
@@ -122,18 +132,42 @@ fun AdminScreen(data: BootstrapData, vm: AppViewModel) {
         Spacer(Modifier.height(14.dp))
 
         if (tab == 0) {
-            Button({ add = true }) {
-                Icon(Icons.Rounded.PersonAdd, null)
-                Spacer(Modifier.width(8.dp))
-                Text("নতুন ইউজার")
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Button({ add = true }) {
+                    Icon(Icons.Rounded.PersonAdd, null)
+                    Spacer(Modifier.width(8.dp))
+                    Text("নতুন ইউজার")
+                }
+                Text(
+                    "বিস্তারিত: ট্যাপ • মুছতে: লং প্রেস",
+                    fontSize = 11.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
             Spacer(Modifier.height(10.dp))
             LazyColumn(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                items(data.users) { u ->
-                    Card(shape = RoundedCornerShape(18.dp)) {
+                items(data.users, key = { it.id }) { u ->
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(18.dp))
+                            .combinedClickable(
+                                onClick = { viewUserDetails = u },
+                                onLongClick = {
+                                    if (u.role != Role.SUPER_ADMIN) {
+                                        userToDelete = u
+                                    }
+                                }
+                            ),
+                        shape = RoundedCornerShape(18.dp)
+                    ) {
                         Row(
                             Modifier
                                 .fillMaxWidth()
@@ -177,7 +211,7 @@ fun AdminScreen(data: BootstrapData, vm: AppViewModel) {
                 if (requests.isEmpty()) {
                     item { EmptyCard("কোনো অপেক্ষমাণ অনুরোধ নেই") }
                 }
-                items(requests) { r ->
+                items(requests, key = { it.id }) { r ->
                     Card(shape = RoundedCornerShape(18.dp)) {
                         Column(
                             Modifier
@@ -213,6 +247,56 @@ fun AdminScreen(data: BootstrapData, vm: AppViewModel) {
         }
     }
 
+    viewUserDetails?.let { u ->
+        val assignedTaskIds = data.assignments
+            .filter { it.userId == u.id && it.active }
+            .map { it.taskId }
+            .toSet()
+        val assignedTasks = data.tasks.filter { it.id in assignedTaskIds }
+        UserDetailsDialog(
+            user = u,
+            assignedTasks = assignedTasks,
+            onDismiss = { viewUserDetails = null }
+        )
+    }
+
+    userToDelete?.let { u ->
+        AlertDialog(
+            onDismissRequest = { userToDelete = null },
+            title = { Text("ইউজার মুছে ফেলুন", fontWeight = FontWeight.Bold) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(
+                        "আপনি কি নিশ্চিত যে '${u.fullName.ifBlank { u.username }}' (${u.username}) ইউজারকে মুছে ফেলতে চান?"
+                    )
+                    Text(
+                        "মুছে ফেললে এই ইউজার আর অ্যাপে লগইন করতে পারবে না।",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        vm.deleteUser(u.id)
+                        userToDelete = null
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text("মুছে ফেলুন")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { userToDelete = null }) {
+                    Text("বাতিল")
+                }
+            }
+        )
+    }
+
     viewSummary?.let {
         AdminUserDialog(it) { viewSummary = null }
     }
@@ -224,6 +308,102 @@ fun AdminScreen(data: BootstrapData, vm: AppViewModel) {
             data.assignments.filter { a -> a.userId == it.id }.map { a -> a.taskId },
             { assignUser = null }
         ) { ids -> vm.assign(it.id, ids); assignUser = null }
+    }
+}
+
+@Composable
+private fun UserDetailsDialog(
+    user: User,
+    assignedTasks: List<Task>,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Column {
+                Text(
+                    text = user.fullName.ifBlank { user.username },
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 20.sp
+                )
+                Text(
+                    text = if (user.profileComplete) "প্রোফাইল সম্পন্ন" else "প্রোফাইল অসম্পূর্ণ",
+                    fontSize = 12.sp,
+                    color = if (user.profileComplete) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+        },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                UserDetailItem("পূর্ণ নাম", user.fullName.ifBlank { "দেওয়া হয়নি" })
+                UserDetailItem("ইউজারনেম", user.username)
+                UserDetailItem(
+                    "রোল",
+                    if (user.role == Role.SUPER_ADMIN) "সুপার অ্যাডমিন" else "সাধারণ ইউজার"
+                )
+                UserDetailItem(
+                    "অ্যাকাউন্ট স্ট্যাটাস",
+                    if (user.active) "সক্রিয়" else "নিষ্ক্রিয়"
+                )
+                HorizontalDivider()
+                UserDetailItem("ফোন নম্বর", user.phone.ifBlank { "দেওয়া হয়নি" })
+                UserDetailItem("বাবার ফোন নম্বর", user.fatherPhone.ifBlank { "দেওয়া হয়নি" })
+                UserDetailItem("জাতীয় পরিচয়পত্র (NID)", user.nid.ifBlank { "দেওয়া হয়নি" })
+                HorizontalDivider()
+                UserDetailItem("বর্তমান ঠিকানা", user.presentAddress.ifBlank { "দেওয়া হয়নি" })
+                UserDetailItem("স্থায়ী ঠিকানা", user.permanentAddress.ifBlank { "দেওয়া হয়নি" })
+                HorizontalDivider()
+                UserDetailItem(
+                    "অ্যাসাইন করা কাজ",
+                    if (assignedTasks.isEmpty()) {
+                        "কোনো কাজ অ্যাসাইন করা নেই"
+                    } else {
+                        assignedTasks.joinToString(", ") { "${it.name} (${it.unit})" }
+                    }
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("বন্ধ করুন", fontWeight = FontWeight.Bold)
+            }
+        }
+    )
+}
+
+@Composable
+private fun UserDetailItem(label: String, value: String) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f)
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            Text(
+                text = label,
+                fontSize = 11.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = value,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
     }
 }
 
@@ -260,7 +440,7 @@ private fun SkuTab(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(skus) { sku ->
+                items(skus, key = { it.id }) { sku ->
                     Card(shape = RoundedCornerShape(14.dp)) {
                         Column(Modifier.fillMaxWidth().padding(12.dp)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -479,6 +659,12 @@ private fun AssignDialog(
 
 @Composable
 private fun AdminUserDialog(summary: UserSummary, close: () -> Unit) {
+    val sortedRecent = remember(summary.dashboard.recentRecords) {
+        summary.dashboard.recentRecords.sortedWith(
+            compareByDescending<com.uddoktahisab.app.data.model.SaleRecord> { it.createdAt }
+                .thenByDescending { it.date }
+        )
+    }
     AlertDialog(
         onDismissRequest = close,
         title = { Text(summary.user.fullName.ifBlank { summary.user.username }) },
@@ -496,10 +682,10 @@ private fun AdminUserDialog(summary: UserSummary, close: () -> Unit) {
                 item {
                     Text("সকল সাম্প্রতিক হিসাব", fontWeight = FontWeight.Bold)
                 }
-                if (summary.dashboard.recentRecords.isEmpty()) {
+                if (sortedRecent.isEmpty()) {
                     item { Text("কোনো হিসাব নেই") }
                 }
-                items(summary.dashboard.recentRecords) { RecordCard(it) }
+                items(sortedRecent, key = { it.id }) { RecordCard(it) }
             }
         },
         confirmButton = { TextButton(close) { Text("বন্ধ করুন") } }

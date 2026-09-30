@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.uddoktahisab.app" />
+                  <option name="mobileSdkAppId" value="1:965984539888:android:e4cf97e3a1a717c4c2de35" />
+                  <option name="projectId" value="uddokta-2d692" />
+                  <option name="projectNumber" value="965984539888" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

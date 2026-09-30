@@ -21,29 +21,9 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Firebase Cloud Firestore Data Source (100% Free Spark Plan).
- *
- * ডাটা ফ্লো:
- * 1. অ্যাপের সব Create / Read / Update / Delete প্রথমে সরাসরি Firebase Firestore-এ সম্পন্ন হয়।
- * 2. প্রতিটি পরিবর্তনের পর FirebaseSyncEvent তৈরি হয়, যা ব্যাকগ্রাউন্ডে Google Apps Script (Code.gs)-কে
- *    ট্রিগার করে এবং Firebase থেকে Google Sheet-এর সংশ্লিষ্ট ট্যাবে ডাটা সিঙ্ক করে।
+ * Firebase Cloud Firestore Data Source (100% Pure Firebase — Free Spark Plan).
+ * অ্যাপের সব Create / Read / Update / Delete সরাসরি Firebase Firestore-এ সম্পন্ন হয়।
  */
-data class FirebaseSyncEvent(
-    val operation: String, // UPSERT or DELETE or FULL_SYNC
-    val collection: String,
-    val docId: String,
-    val document: Map<String, Any?> = emptyMap(),
-    val audit: Map<String, Any?>? = null,
-    val secondaryCollection: String? = null,
-    val secondaryDocId: String? = null,
-    val secondaryDocument: Map<String, Any?>? = null
-)
-
-data class FirebaseActionResult(
-    val message: String,
-    val syncEvents: List<FirebaseSyncEvent>
-)
-
 @Singleton
 class FirebaseDataSource @Inject constructor(
     @ApplicationContext private val context: Context
@@ -57,51 +37,30 @@ class FirebaseDataSource @Inject constructor(
         const val COL_SKUS = "skus"
         const val COL_SESSIONS = "sessions"
         const val COL_AUDIT = "audit_logs"
-        const val COL_SYNC_QUEUE = "sheet_sync_queue"
 
-        private const val PLACEHOLDER_PROJECT_ID = "uddokta-hisab-placeholder"
-        private val DHAKA_ZONE: ZoneId = ZoneId.of("Asia/Dhaka")
+        private val DEFAULT_ZONE: ZoneId
+            get() = ZoneId.systemDefault()
     }
 
-    private val firestore: FirebaseFirestore? by lazy {
-        runCatching {
-            if (FirebaseApp.getApps(context).isEmpty()) {
-                FirebaseApp.initializeApp(context)
+    private val firestore: FirebaseFirestore by lazy {
+        if (FirebaseApp.getApps(context).isEmpty()) {
+            FirebaseApp.initializeApp(context)
+        }
+        FirebaseFirestore.getInstance().apply {
+            runCatching {
+                val settings = FirebaseFirestoreSettings.Builder()
+                    .setLocalCacheSettings(PersistentCacheSettings.newBuilder().build())
+                    .build()
+                firestoreSettings = settings
             }
-            val app = FirebaseApp.getInstance()
-            if (app.options.projectId.isNullOrBlank() || app.options.projectId == PLACEHOLDER_PROJECT_ID) {
-                null
-            } else {
-                FirebaseFirestore.getInstance(app).apply {
-                    val settings = FirebaseFirestoreSettings.Builder()
-                        .setLocalCacheSettings(PersistentCacheSettings.newBuilder().build())
-                        .build()
-                    firestoreSettings = settings
-                }
-            }
-        }.getOrNull()
+        }
     }
 
-    fun isConfigured(): Boolean = firestore != null
-
-    fun firebaseMetadata(): Map<String, String> {
-        return runCatching {
-            val opts = FirebaseApp.getInstance().options
-            mapOf(
-                "firebaseProjectId" to (opts.projectId ?: ""),
-                "firebaseApiKey" to (opts.apiKey ?: "")
-            )
-        }.getOrDefault(emptyMap())
-    }
-
-    private fun db(): FirebaseFirestore =
-        firestore ?: throw IllegalStateException(
-            "Firebase কনফিগার করা হয়নি। Firebase Console থেকে google-services.json ডাউনলোড করে app/google-services.json ফাইলে বসান।"
-        )
+    private fun db(): FirebaseFirestore = firestore
 
     // ─── Real-Time Listener ───
     fun observeCollections(onChanged: () -> Unit): List<ListenerRegistration> {
-        val f = firestore ?: return emptyList()
+        val f = db()
         val collections = listOf(COL_RECORDS, COL_REQUESTS, COL_SKUS, COL_USERS, COL_ASSIGNMENTS, COL_TASKS)
         return collections.map { col ->
             f.collection(col).addSnapshotListener { snapshot, error ->
@@ -113,9 +72,8 @@ class FirebaseDataSource @Inject constructor(
     }
 
     // ─── System Initialization (Default Tasks & Default Super Admin) ───
-    suspend fun initializeSystem(): List<FirebaseSyncEvent> {
+    suspend fun initializeSystem() {
         val f = db()
-        val events = mutableListOf<FirebaseSyncEvent>()
 
         // 1. Default Tasks
         val tasksSnap = f.collection(COL_TASKS).get().await()
@@ -135,7 +93,6 @@ class FirebaseDataSource @Inject constructor(
                     "createdAt" to nowIso()
                 )
                 f.collection(COL_TASKS).document(id).set(doc, SetOptions.merge()).await()
-                events.add(FirebaseSyncEvent("UPSERT", COL_TASKS, id, doc))
             }
         }
 
@@ -159,36 +116,11 @@ class FirebaseDataSource @Inject constructor(
                 "createdAt" to nowIso()
             )
             f.collection(COL_USERS).document(adminId).set(adminDoc, SetOptions.merge()).await()
-            events.add(FirebaseSyncEvent("UPSERT", COL_USERS, adminId, adminDoc))
         }
-
-        return events
-    }
-
-    // ─── Import User from Google Sheet if migrating existing Sheet account ───
-    suspend fun upsertUserFromSheet(user: User, plainPassword: String): FirebaseSyncEvent {
-        val f = db()
-        val doc = mapOf(
-            "id" to user.id,
-            "username" to normalizeUsername(user.username),
-            "passwordHash" to sha256(plainPassword),
-            "role" to user.role.name,
-            "fullName" to user.fullName,
-            "presentAddress" to user.presentAddress,
-            "permanentAddress" to user.permanentAddress,
-            "phone" to user.phone,
-            "fatherPhone" to user.fatherPhone,
-            "nid" to user.nid,
-            "profileComplete" to user.profileComplete,
-            "active" to user.active,
-            "createdAt" to nowIso()
-        )
-        f.collection(COL_USERS).document(user.id).set(doc, SetOptions.merge()).await()
-        return FirebaseSyncEvent("UPSERT", COL_USERS, user.id, doc)
     }
 
     // ─── Login via Firebase Firestore ───
-    suspend fun login(username: String, password: String): Pair<LoginData, List<FirebaseSyncEvent>> {
+    suspend fun login(username: String, password: String): LoginData {
         val f = db()
         initializeSystem()
 
@@ -207,10 +139,8 @@ class FirebaseDataSource @Inject constructor(
         val valid = storedHash.equals(computedHash, ignoreCase = true) || (!looksHashed && storedHash == password)
         if (!valid) throw IllegalStateException("ইউজারনেম অথবা পাসওয়ার্ড সঠিক নয়")
 
-        val syncEvents = mutableListOf<FirebaseSyncEvent>()
         val userId = userDoc.getString("id").orEmpty().ifBlank { userDoc.id }
 
-        // Plain temporary password হলে স্বয়ংক্রিয়ভাবে SHA-256 hash-এ আপডেট করি
         if (!looksHashed && storedHash == password) {
             f.collection(COL_USERS).document(userId).update("passwordHash", computedHash).await()
         }
@@ -224,26 +154,9 @@ class FirebaseDataSource @Inject constructor(
             "expiresAt" to expiresAt
         )
         f.collection(COL_SESSIONS).document(token).set(sessionMap).await()
+        createAudit(f, userId, "LOGIN", "")
 
-        val auditMap = createAudit(f, userId, "LOGIN", "")
-        val user = snapshotToUser(userDoc)
-        val updatedUserMap = userToMap(user, computedHash, userDoc.getString("createdAt") ?: nowIso())
-
-        syncEvents.add(
-            FirebaseSyncEvent(
-                operation = "UPSERT",
-                collection = COL_SESSIONS,
-                docId = token,
-                document = sessionMap,
-                audit = auditMap,
-                secondaryCollection = COL_USERS,
-                secondaryDocId = userId,
-                secondaryDocument = updatedUserMap
-            )
-        )
-        recordSyncEventsInFirestore(f, syncEvents)
-
-        return LoginData(token = token, user = user) to syncEvents
+        return LoginData(token = token, user = snapshotToUser(userDoc))
     }
 
     // ─── Authenticate Token ───
@@ -334,7 +247,6 @@ class FirebaseDataSource @Inject constructor(
             )
         }
 
-        // SUPER_ADMIN data
         val usersSnap = f.collection(COL_USERS).get().await()
         val allUsers = usersSnap.documents.map { snapshotToUser(it) }
         val otherUsers = allUsers.filter { it.id != actor.id }
@@ -402,18 +314,16 @@ class FirebaseDataSource @Inject constructor(
         )
     }
 
-    // ─── Perform Business Action in Firebase First ───
+    // ─── Perform Business Action in Firebase Firestore ───
     suspend fun performAction(
         token: String,
         action: String,
         payload: Map<String, Any?>
-    ): FirebaseActionResult {
+    ): String {
         val f = db()
         if (action == "logout") {
             f.collection(COL_SESSIONS).document(token).delete().await()
-            val ev = FirebaseSyncEvent("DELETE", COL_SESSIONS, token, mapOf("token" to token))
-            recordSyncEventsInFirestore(f, listOf(ev))
-            return FirebaseActionResult("লগআউট হয়েছে", listOf(ev))
+            return "লগআউট হয়েছে"
         }
 
         val actor = authenticate(token)
@@ -421,13 +331,21 @@ class FirebaseDataSource @Inject constructor(
             throw IllegalStateException("প্রথমে প্রোফাইল ১০০% সম্পন্ন করুন")
         }
 
-        val result = when (action) {
+        return when (action) {
             "completeProfile" -> completeProfile(f, actor, payload)
             "addRecord" -> addRecord(f, actor, payload)
             "requestChange" -> requestChange(f, actor, payload)
             "createUser" -> {
                 requireAdmin(actor)
                 createUser(f, actor, payload)
+            }
+            "deleteUser" -> {
+                requireAdmin(actor)
+                deleteUser(f, actor, payload)
+            }
+            "deleteRecord" -> {
+                requireAdmin(actor)
+                deleteRecord(f, actor, payload)
             }
             "assignTasks" -> {
                 requireAdmin(actor)
@@ -451,16 +369,13 @@ class FirebaseDataSource @Inject constructor(
             }
             else -> throw IllegalStateException("Unknown action: $action")
         }
-
-        recordSyncEventsInFirestore(f, result.syncEvents)
-        return result
     }
 
     private suspend fun completeProfile(
         f: FirebaseFirestore,
         actor: User,
         p: Map<String, Any?>
-    ): FirebaseActionResult {
+    ): String {
         if (actor.profileComplete) {
             throw IllegalStateException("সম্পন্ন প্রোফাইল সরাসরি পরিবর্তন করা যাবে না")
         }
@@ -480,24 +395,15 @@ class FirebaseDataSource @Inject constructor(
             "profileComplete" to true
         )
         f.collection(COL_USERS).document(actor.id).set(updates, SetOptions.merge()).await()
-        val updatedSnap = f.collection(COL_USERS).document(actor.id).get().await()
-        val audit = createAudit(f, actor.id, "PROFILE_COMPLETED", "")
-
-        val ev = FirebaseSyncEvent(
-            operation = "UPSERT",
-            collection = COL_USERS,
-            docId = actor.id,
-            document = updatedSnap.data.orEmpty() + updates + ("id" to actor.id),
-            audit = audit
-        )
-        return FirebaseActionResult("প্রোফাইল সম্পন্ন হয়েছে", listOf(ev))
+        createAudit(f, actor.id, "PROFILE_COMPLETED", "")
+        return "প্রোফাইল সম্পন্ন হয়েছে"
     }
 
     private suspend fun addRecord(
         f: FirebaseFirestore,
         actor: User,
         p: Map<String, Any?>
-    ): FirebaseActionResult {
+    ): String {
         val taskId = p["taskId"]?.toString().orEmpty()
         val taskSnap = f.collection(COL_TASKS).document(taskId).get().await()
         if (!taskSnap.exists() || !docBool(taskSnap, "active", true)) {
@@ -547,23 +453,40 @@ class FirebaseDataSource @Inject constructor(
             "updatedAt" to ""
         )
         f.collection(COL_RECORDS).document(recordId).set(recordDoc).await()
-        val audit = createAudit(f, actor.id, "ADD_RECORD", "$taskId:$recordId")
+        createAudit(f, actor.id, "ADD_RECORD", "$taskId:$recordId")
+        return "বিক্রির হিসাব সংরক্ষিত হয়েছে"
+    }
 
-        val ev = FirebaseSyncEvent(
-            operation = "UPSERT",
-            collection = COL_RECORDS,
-            docId = recordId,
-            document = recordDoc,
-            audit = audit
-        )
-        return FirebaseActionResult("বিক্রির হিসাব সংরক্ষিত হয়েছে", listOf(ev))
+    private suspend fun deleteRecord(
+        f: FirebaseFirestore,
+        actor: User,
+        p: Map<String, Any?>
+    ): String {
+        val recordId = p["recordId"]?.toString().orEmpty()
+        if (recordId.isEmpty()) throw IllegalStateException("হিসাবের আইডি পাওয়া যায়নি")
+
+        val recSnap = f.collection(COL_RECORDS).document(recordId).get().await()
+        if (!recSnap.exists()) throw IllegalStateException("হিসাবটি পাওয়া যায়নি")
+
+        f.collection(COL_RECORDS).document(recordId).delete().await()
+
+        // এই রেকর্ডের কোনো পেন্ডিং পরিবর্তনের অনুরোধ থাকলে সেগুলোও মুছে ফেলি
+        runCatching {
+            val reqs = f.collection(COL_REQUESTS).whereEqualTo("recordId", recordId).get().await()
+            for (doc in reqs.documents) {
+                f.collection(COL_REQUESTS).document(doc.id).delete().await()
+            }
+        }
+
+        createAudit(f, actor.id, "DELETE_RECORD", recordId)
+        return "বিক্রির হিসাব মুছে ফেলা হয়েছে"
     }
 
     private suspend fun requestChange(
         f: FirebaseFirestore,
         actor: User,
         p: Map<String, Any?>
-    ): FirebaseActionResult {
+    ): String {
         val recordId = p["recordId"]?.toString().orEmpty()
         val recSnap = f.collection(COL_RECORDS).document(recordId).get().await()
         if (!recSnap.exists() || recSnap.getString("userId") != actor.id) {
@@ -604,23 +527,15 @@ class FirebaseDataSource @Inject constructor(
             "decidedAt" to ""
         )
         f.collection(COL_REQUESTS).document(reqId).set(reqDoc).await()
-        val audit = createAudit(f, actor.id, "REQUEST_CHANGE", recordId)
-
-        val ev = FirebaseSyncEvent(
-            operation = "UPSERT",
-            collection = COL_REQUESTS,
-            docId = reqId,
-            document = reqDoc,
-            audit = audit
-        )
-        return FirebaseActionResult("পরিবর্তনের অনুরোধ অ্যাডমিনকে পাঠানো হয়েছে", listOf(ev))
+        createAudit(f, actor.id, "REQUEST_CHANGE", recordId)
+        return "পরিবর্তনের অনুরোধ অ্যাডমিনকে পাঠানো হয়েছে"
     }
 
     private suspend fun createUser(
         f: FirebaseFirestore,
         actor: User,
         p: Map<String, Any?>
-    ): FirebaseActionResult {
+    ): String {
         val username = normalizeUsername(p["username"]?.toString().orEmpty())
         val password = p["password"]?.toString().orEmpty()
         if (username.length < 3) throw IllegalStateException("ইউজারনেম কমপক্ষে ৩ অক্ষরের হতে হবে")
@@ -649,23 +564,49 @@ class FirebaseDataSource @Inject constructor(
             "createdAt" to nowIso()
         )
         f.collection(COL_USERS).document(newId).set(userDoc).await()
-        val audit = createAudit(f, actor.id, "CREATE_USER", username)
+        createAudit(f, actor.id, "CREATE_USER", username)
+        return "ইউজার তৈরি হয়েছে"
+    }
 
-        val ev = FirebaseSyncEvent(
-            operation = "UPSERT",
-            collection = COL_USERS,
-            docId = newId,
-            document = userDoc,
-            audit = audit
-        )
-        return FirebaseActionResult("ইউজার তৈরি হয়েছে", listOf(ev))
+    private suspend fun deleteUser(
+        f: FirebaseFirestore,
+        actor: User,
+        p: Map<String, Any?>
+    ): String {
+        val userId = p["userId"]?.toString().orEmpty()
+        if (userId.isEmpty()) throw IllegalStateException("ইউজার আইডি পাওয়া যায়নি")
+        if (userId == actor.id) throw IllegalStateException("নিজের অ্যাকাউন্ট মুছে ফেলা যাবে না")
+
+        val userSnap = f.collection(COL_USERS).document(userId).get().await()
+        if (!userSnap.exists()) throw IllegalStateException("ইউজার পাওয়া যায়নি")
+        if (userSnap.getString("role").equals("SUPER_ADMIN", ignoreCase = true)) {
+            throw IllegalStateException("সুপার অ্যাডমিন মুছে ফেলা যাবে না")
+        }
+
+        val deletedUsername = userSnap.getString("username").orEmpty()
+        f.collection(COL_USERS).document(userId).delete().await()
+
+        // ইউজারের সেশন ও অ্যাসাইনমেন্ট মুছে ফেলি
+        runCatching {
+            val sessions = f.collection(COL_SESSIONS).whereEqualTo("userId", userId).get().await()
+            for (doc in sessions.documents) {
+                f.collection(COL_SESSIONS).document(doc.id).delete().await()
+            }
+            val assigns = f.collection(COL_ASSIGNMENTS).whereEqualTo("userId", userId).get().await()
+            for (doc in assigns.documents) {
+                f.collection(COL_ASSIGNMENTS).document(doc.id).delete().await()
+            }
+        }
+
+        createAudit(f, actor.id, "DELETE_USER", "$userId:$deletedUsername")
+        return "ইউজার মুছে ফেলা হয়েছে"
     }
 
     private suspend fun assignTasks(
         f: FirebaseFirestore,
         actor: User,
         p: Map<String, Any?>
-    ): FirebaseActionResult {
+    ): String {
         val uid = p["userId"]?.toString().orEmpty()
         val taskIds = (p["taskIds"] as? List<*>)?.map { it.toString() }.orEmpty()
 
@@ -673,10 +614,8 @@ class FirebaseDataSource @Inject constructor(
         if (!userSnap.exists()) throw IllegalStateException("ইউজার পাওয়া যায়নি")
 
         val existingSnap = f.collection(COL_ASSIGNMENTS).whereEqualTo("userId", uid).get().await()
-        val events = mutableListOf<FirebaseSyncEvent>()
         val now = nowIso()
 
-        // পুরোনো অ্যাসাইনমেন্ট নিষ্ক্রিয় করি
         for (doc in existingSnap.documents) {
             val tId = doc.getString("taskId").orEmpty()
             val isNowActive = tId in taskIds
@@ -688,10 +627,8 @@ class FirebaseDataSource @Inject constructor(
                 "updatedAt" to now
             )
             f.collection(COL_ASSIGNMENTS).document(doc.id).set(updated, SetOptions.merge()).await()
-            events.add(FirebaseSyncEvent("UPSERT", COL_ASSIGNMENTS, doc.id, updated))
         }
 
-        // নতুন অ্যাসাইনমেন্ট যোগ করি
         val existingTaskIds = existingSnap.documents.map { it.getString("taskId").orEmpty() }.toSet()
         for (tId in taskIds) {
             if (tId !in existingTaskIds) {
@@ -704,33 +641,18 @@ class FirebaseDataSource @Inject constructor(
                     "updatedAt" to now
                 )
                 f.collection(COL_ASSIGNMENTS).document(docId).set(newAssign).await()
-                events.add(FirebaseSyncEvent("UPSERT", COL_ASSIGNMENTS, docId, newAssign))
             }
         }
 
-        val audit = createAudit(f, actor.id, "ASSIGN_TASKS", "$uid:${taskIds.joinToString(",")}")
-        if (events.isNotEmpty()) {
-            events[0] = events[0].copy(audit = audit)
-        } else {
-            events.add(
-                FirebaseSyncEvent(
-                    operation = "UPSERT",
-                    collection = COL_ASSIGNMENTS,
-                    docId = "${uid}_none",
-                    document = mapOf("userId" to uid, "taskIds" to taskIds),
-                    audit = audit
-                )
-            )
-        }
-
-        return FirebaseActionResult("কাজ অ্যাসাইন করা হয়েছে", events)
+        createAudit(f, actor.id, "ASSIGN_TASKS", "$uid:${taskIds.joinToString(",")}")
+        return "কাজ অ্যাসাইন করা হয়েছে"
     }
 
     private suspend fun decideChangeRequest(
         f: FirebaseFirestore,
         actor: User,
         p: Map<String, Any?>
-    ): FirebaseActionResult {
+    ): String {
         val requestId = p["requestId"]?.toString().orEmpty()
         val reqSnap = f.collection(COL_REQUESTS).document(requestId).get().await()
         if (!reqSnap.exists() || reqSnap.getString("status") != "PENDING") {
@@ -739,7 +661,6 @@ class FirebaseDataSource @Inject constructor(
 
         val approve = p["approve"] == true || p["approve"]?.toString().equals("true", ignoreCase = true)
         val now = nowIso()
-        var updatedRecordMap: Map<String, Any?>? = null
         val recordId = reqSnap.getString("recordId").orEmpty()
 
         if (approve) {
@@ -757,7 +678,6 @@ class FirebaseDataSource @Inject constructor(
                 "updatedAt" to now
             )
             f.collection(COL_RECORDS).document(recordId).set(recUpdates, SetOptions.merge()).await()
-            updatedRecordMap = recSnap.data.orEmpty() + recUpdates + ("id" to recordId)
         }
 
         val reqUpdates = mapOf(
@@ -766,28 +686,16 @@ class FirebaseDataSource @Inject constructor(
             "decidedAt" to now
         )
         f.collection(COL_REQUESTS).document(requestId).set(reqUpdates, SetOptions.merge()).await()
-        val fullReqMap = reqSnap.data.orEmpty() + reqUpdates + ("id" to requestId)
-        val audit = createAudit(f, actor.id, if (approve) "APPROVE_CHANGE" else "REJECT_CHANGE", requestId)
+        createAudit(f, actor.id, if (approve) "APPROVE_CHANGE" else "REJECT_CHANGE", requestId)
 
-        val ev = FirebaseSyncEvent(
-            operation = "UPSERT",
-            collection = COL_REQUESTS,
-            docId = requestId,
-            document = fullReqMap,
-            audit = audit,
-            secondaryCollection = if (approve) COL_RECORDS else null,
-            secondaryDocId = if (approve) recordId else null,
-            secondaryDocument = updatedRecordMap
-        )
-        val msg = if (approve) "পরিবর্তন অনুমোদিত হয়েছে" else "অনুরোধ বাতিল হয়েছে"
-        return FirebaseActionResult(msg, listOf(ev))
+        return if (approve) "পরিবর্তন অনুমোদিত হয়েছে" else "অনুরোধ বাতিল হয়েছে"
     }
 
     private suspend fun addSku(
         f: FirebaseFirestore,
         actor: User,
         p: Map<String, Any?>
-    ): FirebaseActionResult {
+    ): String {
         val name = p["name"]?.toString().orEmpty().trim()
         val unit = p["unit"]?.toString().orEmpty().trim().ifBlank { "kg" }
         val totalStock = (p["totalStock"] as? Number)?.toDouble()
@@ -815,23 +723,15 @@ class FirebaseDataSource @Inject constructor(
             "createdAt" to nowIso()
         )
         f.collection(COL_SKUS).document(skuId).set(skuDoc).await()
-        val audit = createAudit(f, actor.id, "ADD_SKU", "$name:$totalStock")
-
-        val ev = FirebaseSyncEvent(
-            operation = "UPSERT",
-            collection = COL_SKUS,
-            docId = skuId,
-            document = skuDoc,
-            audit = audit
-        )
-        return FirebaseActionResult("SKU যোগ হয়েছে", listOf(ev))
+        createAudit(f, actor.id, "ADD_SKU", "$name:$totalStock")
+        return "SKU যোগ হয়েছে"
     }
 
     private suspend fun addPurchase(
         f: FirebaseFirestore,
         actor: User,
         p: Map<String, Any?>
-    ): FirebaseActionResult {
+    ): String {
         val skuId = p["skuId"]?.toString().orEmpty()
         val quantity = (p["quantity"] as? Number)?.toDouble()
             ?: p["quantity"]?.toString()?.toDoubleOrNull() ?: 0.0
@@ -851,24 +751,15 @@ class FirebaseDataSource @Inject constructor(
             "totalCost" to newCost
         )
         f.collection(COL_SKUS).document(skuId).set(updates, SetOptions.merge()).await()
-        val fullSkuMap = skuSnap.data.orEmpty() + updates + ("id" to skuId)
-        val audit = createAudit(f, actor.id, "ADD_PURCHASE", "$skuId:+$quantity:$cost")
-
-        val ev = FirebaseSyncEvent(
-            operation = "UPSERT",
-            collection = COL_SKUS,
-            docId = skuId,
-            document = fullSkuMap,
-            audit = audit
-        )
-        return FirebaseActionResult("কেনা যোগ হয়েছে", listOf(ev))
+        createAudit(f, actor.id, "ADD_PURCHASE", "$skuId:+$quantity:$cost")
+        return "কেনা যোগ হয়েছে"
     }
 
     private suspend fun deleteSku(
         f: FirebaseFirestore,
         actor: User,
         p: Map<String, Any?>
-    ): FirebaseActionResult {
+    ): String {
         val id = p["id"]?.toString().orEmpty()
         if (id.isEmpty()) throw IllegalStateException("SKU আইডি দিন")
 
@@ -876,16 +767,8 @@ class FirebaseDataSource @Inject constructor(
         if (!skuSnap.exists()) throw IllegalStateException("SKU পাওয়া যায়নি")
 
         f.collection(COL_SKUS).document(id).delete().await()
-        val audit = createAudit(f, actor.id, "DELETE_SKU", id)
-
-        val ev = FirebaseSyncEvent(
-            operation = "DELETE",
-            collection = COL_SKUS,
-            docId = id,
-            document = mapOf("id" to id),
-            audit = audit
-        )
-        return FirebaseActionResult("SKU মুছে ফেলা হয়েছে", listOf(ev))
+        createAudit(f, actor.id, "DELETE_SKU", id)
+        return "SKU মুছে ফেলা হয়েছে"
     }
 
     // ─── Helpers ───
@@ -894,7 +777,7 @@ class FirebaseDataSource @Inject constructor(
         userId: String,
         action: String,
         details: String
-    ): Map<String, Any?> {
+    ) {
         val auditId = UUID.randomUUID().toString()
         val map = mapOf(
             "id" to auditId,
@@ -904,34 +787,16 @@ class FirebaseDataSource @Inject constructor(
             "createdAt" to nowIso()
         )
         f.collection(COL_AUDIT).document(auditId).set(map).await()
-        return map
-    }
-
-    private suspend fun recordSyncEventsInFirestore(
-        f: FirebaseFirestore,
-        events: List<FirebaseSyncEvent>
-    ) {
-        runCatching {
-            for (ev in events) {
-                val syncId = UUID.randomUUID().toString()
-                val syncDoc = mapOf(
-                    "id" to syncId,
-                    "operation" to ev.operation,
-                    "collection" to ev.collection,
-                    "docId" to ev.docId,
-                    "createdAt" to nowIso()
-                )
-                f.collection(COL_SYNC_QUEUE).document(syncId).set(syncDoc)
-            }
-        }
     }
 
     private fun buildDashboard(userId: String, allRecords: List<SaleRecord>): Dashboard {
-        val today = LocalDate.now(DHAKA_ZONE).toString()
-        val month = today.take(7)
+        val today = LocalDate.now(DEFAULT_ZONE).toString()
         val userRecords = allRecords
             .filter { it.userId == userId }
-            .sortedByDescending { it.createdAt.ifBlank { it.date } }
+            .sortedWith(
+                compareByDescending<SaleRecord> { it.createdAt }
+                    .thenByDescending { it.date }
+            )
 
         var tq = 0.0
         var ts = 0.0
@@ -942,10 +807,8 @@ class FirebaseDataSource @Inject constructor(
                 tq += r.quantity
                 ts += r.total
             }
-            if (r.date.startsWith(month)) {
-                mq += r.quantity
-                ms += r.total
-            }
+            mq += r.quantity
+            ms += r.total
         }
         return Dashboard(
             todayQuantity = tq,
@@ -974,22 +837,6 @@ class FirebaseDataSource @Inject constructor(
             active = docBool(doc, "active", true)
         )
     }
-
-    private fun userToMap(user: User, passwordHash: String, createdAt: String): Map<String, Any?> = mapOf(
-        "id" to user.id,
-        "username" to user.username,
-        "passwordHash" to passwordHash,
-        "role" to user.role.name,
-        "fullName" to user.fullName,
-        "presentAddress" to user.presentAddress,
-        "permanentAddress" to user.permanentAddress,
-        "phone" to user.phone,
-        "fatherPhone" to user.fatherPhone,
-        "nid" to user.nid,
-        "profileComplete" to user.profileComplete,
-        "active" to user.active,
-        "createdAt" to createdAt
-    )
 
     private fun requireAdmin(user: User) {
         if (user.role != Role.SUPER_ADMIN) {

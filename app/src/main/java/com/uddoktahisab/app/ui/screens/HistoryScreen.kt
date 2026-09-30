@@ -76,7 +76,6 @@ private fun getBanglaDay(date: String): String {
 @Composable
 private fun HistoryRecordCard(
     r: SaleRecord,
-    isAdmin: Boolean = false,
     onEdit: (() -> Unit)? = null
 ) {
     val dateTime = remember(r.date, r.createdAt) { formatDateTime(r.date, r.createdAt) }
@@ -88,9 +87,6 @@ private fun HistoryRecordCard(
     ) {
         Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                if (isAdmin && r.userName.isNotBlank()) {
-                    Text("বিক্রেতা: ${r.userName}", fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                }
                 if (r.taskName.isNotBlank()) {
                     Text("কাজ: ${r.taskName}", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
                 }
@@ -123,6 +119,15 @@ fun HistoryScreen(
     isAdmin: Boolean = false
 ) {
     var editing by remember { mutableStateOf<SaleRecord?>(null) }
+
+    // সর্বশেষ এন্ট্রি সবার আগে দেখানোর জন্য createdAt (এবং date) অনুসারে সাজানো
+    val sortedRecords = remember(records) {
+        records.sortedWith(
+            compareByDescending<SaleRecord> { it.createdAt }
+                .thenByDescending { it.date }
+        )
+    }
+
     LazyColumn(
         Modifier
             .fillMaxSize()
@@ -137,16 +142,15 @@ fun HistoryScreen(
                 fontWeight = FontWeight.ExtraBold
             )
             Text(
-                if (isAdmin) "সকলের বিক্রির হিসাব" else "পরিবর্তন করতে অ্যাডমিনের অনুমতি আবশ্যক",
+                if (isAdmin) "শুধুমাত্র আমার নিজের বিক্রির হিসাব" else "পরিবর্তন করতে অ্যাডমিনের অনুমতি আবশ্যক",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 12.sp
             )
         }
-        if (records.isEmpty()) item { EmptyCard("কোনো হিসাব পাওয়া যায়নি") }
-        items(records) { r ->
+        if (sortedRecords.isEmpty()) item { EmptyCard("কোনো হিসাব পাওয়া যায়নি") }
+        items(sortedRecords, key = { it.id }) { r ->
             HistoryRecordCard(
                 r = r,
-                isAdmin = isAdmin,
                 onEdit = if (isAdmin) null else { { editing = r } }
             )
         }

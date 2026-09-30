@@ -21,10 +21,8 @@ import com.uddoktahisab.app.data.local.NetworkMonitor;
 import com.uddoktahisab.app.data.local.SessionManager;
 import com.uddoktahisab.app.data.local.db.AppDatabase;
 import com.uddoktahisab.app.data.local.db.LocalDao;
-import com.uddoktahisab.app.data.remote.ApiService;
 import com.uddoktahisab.app.data.remote.FirebaseDataSource;
 import com.uddoktahisab.app.data.repository.AppRepository;
-import com.uddoktahisab.app.di.AppModule_ApiFactory;
 import com.uddoktahisab.app.di.AppModule_DaoFactory;
 import com.uddoktahisab.app.di.AppModule_DatabaseFactory;
 import com.uddoktahisab.app.di.AppModule_GsonFactory;
@@ -566,15 +564,13 @@ public final class DaggerUddoktaApp_HiltComponents_SingletonC {
 
     private final SingletonCImpl singletonCImpl = this;
 
-    private Provider<Gson> gsonProvider;
-
-    private Provider<ApiService> apiProvider;
-
     private Provider<FirebaseDataSource> firebaseDataSourceProvider;
 
     private Provider<SessionManager> sessionManagerProvider;
 
     private Provider<AppDatabase> databaseProvider;
+
+    private Provider<Gson> gsonProvider;
 
     private Provider<LocalStore> localStoreProvider;
 
@@ -605,13 +601,12 @@ public final class DaggerUddoktaApp_HiltComponents_SingletonC {
 
     @SuppressWarnings("unchecked")
     private void initialize(final ApplicationContextModule applicationContextModuleParam) {
-      this.gsonProvider = DoubleCheck.provider(new SwitchingProvider<Gson>(singletonCImpl, 3));
-      this.apiProvider = DoubleCheck.provider(new SwitchingProvider<ApiService>(singletonCImpl, 2));
-      this.firebaseDataSourceProvider = DoubleCheck.provider(new SwitchingProvider<FirebaseDataSource>(singletonCImpl, 4));
-      this.sessionManagerProvider = DoubleCheck.provider(new SwitchingProvider<SessionManager>(singletonCImpl, 5));
-      this.databaseProvider = DoubleCheck.provider(new SwitchingProvider<AppDatabase>(singletonCImpl, 7));
-      this.localStoreProvider = DoubleCheck.provider(new SwitchingProvider<LocalStore>(singletonCImpl, 6));
-      this.networkMonitorProvider = DoubleCheck.provider(new SwitchingProvider<NetworkMonitor>(singletonCImpl, 8));
+      this.firebaseDataSourceProvider = DoubleCheck.provider(new SwitchingProvider<FirebaseDataSource>(singletonCImpl, 2));
+      this.sessionManagerProvider = DoubleCheck.provider(new SwitchingProvider<SessionManager>(singletonCImpl, 3));
+      this.databaseProvider = DoubleCheck.provider(new SwitchingProvider<AppDatabase>(singletonCImpl, 5));
+      this.gsonProvider = DoubleCheck.provider(new SwitchingProvider<Gson>(singletonCImpl, 6));
+      this.localStoreProvider = DoubleCheck.provider(new SwitchingProvider<LocalStore>(singletonCImpl, 4));
+      this.networkMonitorProvider = DoubleCheck.provider(new SwitchingProvider<NetworkMonitor>(singletonCImpl, 7));
       this.appRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<AppRepository>(singletonCImpl, 1));
       this.pendingSyncWorker_AssistedFactoryProvider = SingleCheck.provider(new SwitchingProvider<PendingSyncWorker_AssistedFactory>(singletonCImpl, 0));
     }
@@ -665,27 +660,24 @@ public final class DaggerUddoktaApp_HiltComponents_SingletonC {
           };
 
           case 1: // com.uddoktahisab.app.data.repository.AppRepository 
-          return (T) new AppRepository(singletonCImpl.apiProvider.get(), singletonCImpl.firebaseDataSourceProvider.get(), singletonCImpl.sessionManagerProvider.get(), singletonCImpl.localStoreProvider.get(), singletonCImpl.networkMonitorProvider.get(), ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
+          return (T) new AppRepository(singletonCImpl.firebaseDataSourceProvider.get(), singletonCImpl.sessionManagerProvider.get(), singletonCImpl.localStoreProvider.get(), singletonCImpl.networkMonitorProvider.get(), ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
 
-          case 2: // com.uddoktahisab.app.data.remote.ApiService 
-          return (T) AppModule_ApiFactory.api(singletonCImpl.gsonProvider.get());
-
-          case 3: // com.google.gson.Gson 
-          return (T) AppModule_GsonFactory.gson();
-
-          case 4: // com.uddoktahisab.app.data.remote.FirebaseDataSource 
+          case 2: // com.uddoktahisab.app.data.remote.FirebaseDataSource 
           return (T) new FirebaseDataSource(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
 
-          case 5: // com.uddoktahisab.app.data.local.SessionManager 
+          case 3: // com.uddoktahisab.app.data.local.SessionManager 
           return (T) new SessionManager(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
 
-          case 6: // com.uddoktahisab.app.data.local.LocalStore 
+          case 4: // com.uddoktahisab.app.data.local.LocalStore 
           return (T) new LocalStore(singletonCImpl.localDao(), singletonCImpl.gsonProvider.get());
 
-          case 7: // com.uddoktahisab.app.data.local.db.AppDatabase 
+          case 5: // com.uddoktahisab.app.data.local.db.AppDatabase 
           return (T) AppModule_DatabaseFactory.database(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
 
-          case 8: // com.uddoktahisab.app.data.local.NetworkMonitor 
+          case 6: // com.google.gson.Gson 
+          return (T) AppModule_GsonFactory.gson();
+
+          case 7: // com.uddoktahisab.app.data.local.NetworkMonitor 
           return (T) new NetworkMonitor(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
 
           default: throw new AssertionError(id);

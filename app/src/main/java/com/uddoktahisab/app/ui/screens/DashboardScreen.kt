@@ -1,7 +1,8 @@
 package com.uddoktahisab.app.ui.screens
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -16,6 +17,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,18 +35,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.uddoktahisab.app.data.model.BootstrapData
 import com.uddoktahisab.app.data.model.Dashboard
+import com.uddoktahisab.app.data.model.Role
 import com.uddoktahisab.app.data.model.SaleRecord
-import com.uddoktahisab.app.data.model.User
 import com.uddoktahisab.app.data.model.UserSummary
 import com.uddoktahisab.app.ui.components.BrandMark
 import com.uddoktahisab.app.ui.components.EmptyCard
 import com.uddoktahisab.app.ui.components.MetricCard
-import com.uddoktahisab.app.ui.components.RecordCard
 import com.uddoktahisab.app.ui.components.money
 import com.uddoktahisab.app.ui.components.number
 import com.uddoktahisab.app.viewmodel.AppViewModel
@@ -79,10 +81,14 @@ private fun combinedDashboard(summaries: List<UserSummary>): Dashboard =
         )
     }
 
-/** সবার recent records মিলিয়ে date অনুসারে sort করে — admin combined view তে দেখায় */
+/** সবার recent records মিলিয়ে সর্বশেষ এন্ট্রি (createdAt) অনুসারে সাজায় — যাতে নতুন এন্ট্রি সবার উপরে দেখায় */
 private fun combinedRecent(summaries: List<UserSummary>): List<SaleRecord> =
     summaries.flatMap { it.dashboard.recentRecords }
-        .sortedByDescending { it.date }
+        .distinctBy { it.id }
+        .sortedWith(
+            compareByDescending<SaleRecord> { it.createdAt }
+                .thenByDescending { it.date }
+        )
         .take(20)
 
 /** Date (YYYY-MM-DD) এবং createdAt (ISO 8601) থেকে 12hr ফরম্যাটে তারিখ ও সময় তৈরি */
@@ -95,9 +101,10 @@ private fun formatRecordDateTime(date: String, createdAt: String): String {
             return "$d $time"
         } catch (_: Exception) {}
     }
-    // Fallback: শুধু date থাকলে
-    try { val d = LocalDate.parse(date).format(DateTimeFormatter.ofPattern("MMMM d, yyyy")); return "$d" }
-    catch (_: Exception) {}
+    try {
+        val d = LocalDate.parse(date).format(DateTimeFormatter.ofPattern("MMMM d, yyyy"))
+        return d
+    } catch (_: Exception) {}
     return date.ifBlank { "" }
 }
 
@@ -111,29 +118,55 @@ private fun UserRecordCard(r: SaleRecord) {
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            if (r.taskName.isNotBlank()) {
+                Text("কাজ: ${r.taskName}", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+            }
             Text("তারিখ: $dateTime", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text("পরিমাণ: ${number(r.quantity)} ${r.unit}", fontSize = 13.sp)
             Text("একক মূল্য: ${money(r.unitPrice)}", fontSize = 13.sp)
-            Text("মোট মূল্য: ${money(r.total)}", fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, color = MaterialTheme.colorScheme.primary)
+            Text(
+                "মোট মূল্য: ${money(r.total)}",
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 16.sp,
+                color = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }
 
-/** Admin dashboard-এর recent record বিস্তারিত কার্ড */
+/** Admin dashboard-এর recent record বিস্তারিত কার্ড — Long Press করলে ডিলিট অপশন আসবে */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun AdminRecordCard(r: SaleRecord) {
+private fun AdminRecordCard(
+    r: SaleRecord,
+    onLongPressDelete: () -> Unit
+) {
     val dateTime = remember(r.date, r.createdAt) { formatRecordDateTime(r.date, r.createdAt) }
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .combinedClickable(
+                onClick = {},
+                onLongClick = onLongPressDelete
+            )
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text("বিক্রেতা: ${r.userName}", fontWeight = FontWeight.Bold, fontSize = 15.sp)
+            if (r.taskName.isNotBlank()) {
+                Text("কাজ: ${r.taskName}", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+            }
             Text("তারিখ: $dateTime", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text("পরিমাণ: ${number(r.quantity)} ${r.unit}", fontSize = 13.sp)
             Text("একক মূল্য: ${money(r.unitPrice)}", fontSize = 13.sp)
-            Text("মোট মূল্য: ${money(r.total)}", fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, color = MaterialTheme.colorScheme.primary)
+            Text(
+                "মোট মূল্য: ${money(r.total)}",
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 16.sp,
+                color = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }
@@ -141,8 +174,9 @@ private fun AdminRecordCard(r: SaleRecord) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(data: BootstrapData, vm: AppViewModel) {
-    val isAdmin = data.user.role == com.uddoktahisab.app.data.model.Role.SUPER_ADMIN
+    val isAdmin = data.user.role == Role.SUPER_ADMIN
     val greeting = remember { greetingText() }
+    var recordToDelete by remember { mutableStateOf<SaleRecord?>(null) }
 
     // ─── Swipe-to-refresh ───
     var refreshing by remember { mutableStateOf(false) }
@@ -160,7 +194,16 @@ fun DashboardScreen(data: BootstrapData, vm: AppViewModel) {
     }
 
     val combined = if (isAdmin) combinedDashboard(data.userSummaries) else data.dashboard
-    val recent = if (isAdmin) combinedRecent(data.userSummaries) else data.dashboard.recentRecords
+    val recent = remember(isAdmin, data.userSummaries, data.dashboard.recentRecords) {
+        if (isAdmin) {
+            combinedRecent(data.userSummaries)
+        } else {
+            data.dashboard.recentRecords.sortedWith(
+                compareByDescending<SaleRecord> { it.createdAt }
+                    .thenByDescending { it.date }
+            )
+        }
+    }
 
     PullToRefreshBox(
         isRefreshing = refreshing,
@@ -174,10 +217,13 @@ fun DashboardScreen(data: BootstrapData, vm: AppViewModel) {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
-                BrandMark(true); Spacer(Modifier.height(18.dp)); Text(
-                "$greeting,",
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            ); Text(data.user.fullName, fontSize = 27.sp, fontWeight = FontWeight.ExtraBold)
+                BrandMark(true)
+                Spacer(Modifier.height(18.dp))
+                Text(
+                    "$greeting,",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(data.user.fullName, fontSize = 27.sp, fontWeight = FontWeight.ExtraBold)
             }
 
             if (isAdmin) {
@@ -207,12 +253,12 @@ fun DashboardScreen(data: BootstrapData, vm: AppViewModel) {
                 item {
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         MetricCard(
-                            "মাসিক বিক্রি",
+                            "সর্বমোট বিক্রি",
                             money(combined.monthSales),
                             Modifier.weight(1f)
                         )
                         MetricCard(
-                            "মাসিক পরিমাণ",
+                            "সর্বমোট পরিমাণ",
                             "${number(combined.monthQuantity)} kg",
                             Modifier.weight(1f)
                         )
@@ -226,7 +272,12 @@ fun DashboardScreen(data: BootstrapData, vm: AppViewModel) {
                             shape = RoundedCornerShape(16.dp),
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                         ) {
-                            Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Column(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(14.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
                                 Text("SKU স্টক বিবরণ", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                                 skus.take(8).forEach { sku ->
                                     Card(
@@ -234,9 +285,19 @@ fun DashboardScreen(data: BootstrapData, vm: AppViewModel) {
                                         shape = RoundedCornerShape(12.dp),
                                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                                     ) {
-                                        Column(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                        Column(
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 12.dp, vertical = 10.dp),
+                                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                                        ) {
                                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                                Text(sku.name, fontWeight = FontWeight.Bold, fontSize = 15.sp, modifier = Modifier.weight(1f))
+                                                Text(
+                                                    sku.name,
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = 15.sp,
+                                                    modifier = Modifier.weight(1f)
+                                                )
                                                 Text(
                                                     if (sku.profit >= 0) "লাভ ${money(sku.profit)}" else "ক্ষতি ${money(-sku.profit)}",
                                                     fontSize = 12.sp,
@@ -294,10 +355,18 @@ fun DashboardScreen(data: BootstrapData, vm: AppViewModel) {
                     }
                 }
                 item {
-                    Text("সকলের সাম্প্রতিক হিসাব",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Column {
+                        Text(
+                            "সকলের সাম্প্রতিক হিসাব",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            "যেকোনো হিসাব মুছে ফেলতে আইটেমের ওপর চাপ দিয়ে ধরে রাখুন (Long Press)",
+                            fontSize = 11.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             } else {
                 item {
@@ -317,12 +386,12 @@ fun DashboardScreen(data: BootstrapData, vm: AppViewModel) {
                 item {
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         MetricCard(
-                            "মাসিক বিক্রি",
+                            "সর্বমোট বিক্রি",
                             money(data.dashboard.monthSales),
                             Modifier.weight(1f)
                         )
                         MetricCard(
-                            "মাসিক পরিমাণ",
+                            "সর্বমোট পরিমাণ",
                             "${number(data.dashboard.monthQuantity)} kg",
                             Modifier.weight(1f)
                         )
@@ -340,12 +409,64 @@ fun DashboardScreen(data: BootstrapData, vm: AppViewModel) {
             if (recent.isEmpty()) {
                 item { EmptyCard("এখনও কোনো বিক্রির হিসাব নেই") }
             } else {
-                items(recent.take(8)) { r ->
-                    if (isAdmin) AdminRecordCard(r)
-                    else UserRecordCard(r)
+                items(recent.take(20), key = { it.id }) { r ->
+                    if (isAdmin) {
+                        AdminRecordCard(
+                            r = r,
+                            onLongPressDelete = { recordToDelete = r }
+                        )
+                    } else {
+                        UserRecordCard(r)
+                    }
                 }
             }
         }
     }
 
+    recordToDelete?.let { rec ->
+        AlertDialog(
+            onDismissRequest = { recordToDelete = null },
+            title = { Text("হিসাব মুছে ফেলুন", fontWeight = FontWeight.Bold) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text("আপনি কি নিশ্চিত যে এই বিক্রির হিসাবটি মুছে ফেলতে চান?")
+                    Spacer(Modifier.height(4.dp))
+                    Text("বিক্রেতা: ${rec.userName}", fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+                    if (rec.taskName.isNotBlank()) {
+                        Text("কাজ: ${rec.taskName}", fontSize = 13.sp)
+                    }
+                    Text("পরিমাণ: ${number(rec.quantity)} ${rec.unit}", fontSize = 13.sp)
+                    Text(
+                        "মোট মূল্য: ${money(rec.total)}",
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(Modifier.height(2.dp))
+                    Text(
+                        "এটি মুছে ফেললে মোট বিক্রি ও পরিমাণের হিসাব থেকেও বাদ যাবে।",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        vm.deleteRecord(rec.id)
+                        recordToDelete = null
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text("মুছে ফেলুন")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { recordToDelete = null }) {
+                    Text("বাতিল")
+                }
+            }
+        )
+    }
 }
