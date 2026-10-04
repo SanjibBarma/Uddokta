@@ -1,0 +1,74 @@
+com.uddoktahisab.app-savedstate-ktx-1.2.1-0 C:\Users\samur\.gradle\caches\8.14.5\transforms\06c2502a07ee132354581da07fe9de05\transformed\savedstate-ktx-1.2.1\res
+com.uddoktahisab.app-annotation-experimental-1.4.1-1 C:\Users\samur\.gradle\caches\8.14.5\transforms\09f2c58cfad89a0671eb7500e3251828\transformed\annotation-experimental-1.4.1\res
+com.uddoktahisab.app-lifecycle-process-2.8.7-2 C:\Users\samur\.gradle\caches\8.14.5\transforms\0c9f7b13ee2861f73a0af82ab741b2d0\transformed\lifecycle-process-2.8.7\res
+com.uddoktahisab.app-ui-release-3 C:\Users\samur\.gradle\caches\8.14.5\transforms\14ea32dc770269bf5678cca5101b5c88\transformed\ui-release\res
+com.uddoktahisab.app-lifecycle-runtime-ktx-release-4 C:\Users\samur\.gradle\caches\8.14.5\transforms\185569c7c150ef634fa515a16e6bd15b\transformed\lifecycle-runtime-ktx-release\res
+com.uddoktahisab.app-material-icons-core-release-5 C:\Users\samur\.gradle\caches\8.14.5\transforms\19d65bbde90bf759de20ea14af967ef6\transformed\material-icons-core-release\res
+com.uddoktahisab.app-ui-unit-release-6 C:\Users\samur\.gradle\caches\8.14.5\transforms\214ef6f77ba25193f62289ae11974f4c\transformed\ui-unit-release\res
+com.uddoktahisab.app-customview-poolingcontainer-1.0.0-7 C:\Users\samur\.gradle\caches\8.14.5\transforms\28bf15e1df0d9bfc1aea7cea13624372\transformed\customview-poolingcontainer-1.0.0\res
+com.uddoktahisab.app-ui-text-release-8 C:\Users\samur\.gradle\caches\8.14.5\transforms\2f9569595f962d32b4b27aeebf66a422\transformed\ui-text-release\res
+com.uddoktahisab.app-material3-release-9 C:\Users\samur\.gradle\caches\8.14.5\transforms\30fc903fa486b81bab863faaed9498e0\transformed\material3-release\res
+com.uddoktahisab.app-activity-compose-1.10.0-10 C:\Users\samur\.gradle\caches\8.14.5\transforms\37f236bbdd43fe53db6d0637da77e181\transformed\activity-compose-1.10.0\res
+com.uddoktahisab.app-fragment-1.5.1-11 C:\Users\samur\.gradle\caches\8.14.5\transforms\3a733a434408cbc1a4c95fdbfe5a05c8\transformed\fragment-1.5.1\res
+com.uddoktahisab.app-room-ktx-2.6.1-12 C:\Users\samur\.gradle\caches\8.14.5\transforms\3b68c0132b99c76176e11f74fbcdce11\transformed\room-ktx-2.6.1\res
+com.uddoktahisab.app-savedstate-1.2.1-13 C:\Users\samur\.gradle\caches\8.14.5\transforms\3cbf81e593f10919974a24c8b7efb87f\transformed\savedstate-1.2.1\res
+com.uddoktahisab.app-foundation-release-14 C:\Users\samur\.gradle\caches\8.14.5\transforms\42dac1d340a677b1138be09e11608569\transformed\foundation-release\res
+com.uddoktahisab.app-core-runtime-2.2.0-15 C:\Users\samur\.gradle\caches\8.14.5\transforms\44245e9c354871f8a599a46291ea5ee1\transformed\core-runtime-2.2.0\res
+com.uddoktahisab.app-ui-util-release-16 C:\Users\samur\.gradle\caches\8.14.5\transforms\4cfff3b0d4de88763c75ffb8eef765a8\transformed\ui-util-release\res
+com.uddoktahisab.app-core-1.15.0-17 C:\Users\samur\.gradle\caches\8.14.5\transforms\531e3a30e8b8c4e52e405c6471d869d9\transformed\core-1.15.0\res
+com.uddoktahisab.app-navigation-runtime-ktx-2.8.5-18 C:\Users\samur\.gradle\caches\8.14.5\transforms\59ae7a3566620f4b596f3d17ad5f75c6\transformed\navigation-runtime-ktx-2.8.5\res
+com.uddoktahisab.app-work-runtime-2.10.0-19 C:\Users\samur\.gradle\caches\8.14.5\transforms\5d05262df6be9298d5af4cc48242c56f\transformed\work-runtime-2.10.0\res
+com.uddoktahisab.app-runtime-release-20 C:\Users\samur\.gradle\caches\8.14.5\transforms\5d59c5b60aee44264b1a63c962fe3b89\transformed\runtime-release\res
+com.uddoktahisab.app-navigation-common-ktx-2.8.5-21 C:\Users\samur\.gradle\caches\8.14.5\transforms\5ef04aff84638b43d098c1fd1a7b9ac8\transformed\navigation-common-ktx-2.8.5\res
+com.uddoktahisab.app-hilt-work-1.2.0-22 C:\Users\samur\.gradle\caches\8.14.5\transforms\6658f12cae79ee2dbb9b17899c6c692a\transformed\hilt-work-1.2.0\res
+com.uddoktahisab.app-datastore-preferences-release-23 C:\Users\samur\.gradle\caches\8.14.5\transforms\68c4db780fae0b58203f123743c45190\transformed\datastore-preferences-release\res
+com.uddoktahisab.app-core-ktx-1.15.0-24 C:\Users\samur\.gradle\caches\8.14.5\transforms\6d7ec38c2dfd048749260d020b72e822\transformed\core-ktx-1.15.0\res
+com.uddoktahisab.app-sqlite-framework-2.4.0-25 C:\Users\samur\.gradle\caches\8.14.5\transforms\725229145837e5c5744a0ca19d71724c\transformed\sqlite-framework-2.4.0\res
+com.uddoktahisab.app-firebase-common-21.0.0-26 C:\Users\samur\.gradle\caches\8.14.5\transforms\7437eb80c5ef397427884b1ef7d92ea9\transformed\firebase-common-21.0.0\res
+com.uddoktahisab.app-lifecycle-runtime-release-27 C:\Users\samur\.gradle\caches\8.14.5\transforms\794798231d45773c008564428cdc707f\transformed\lifecycle-runtime-release\res
+com.uddoktahisab.app-sqlite-2.4.0-28 C:\Users\samur\.gradle\caches\8.14.5\transforms\80a26329cb4082213e56902bb0e6efcd\transformed\sqlite-2.4.0\res
+com.uddoktahisab.app-navigation-compose-2.8.5-29 C:\Users\samur\.gradle\caches\8.14.5\transforms\90906c575dd39ab2f1dbe2a2fb83fb15\transformed\navigation-compose-2.8.5\res
+com.uddoktahisab.app-material-icons-extended-release-30 C:\Users\samur\.gradle\caches\8.14.5\transforms\9bb54ff3cea087748e03ea721cd9e6e9\transformed\material-icons-extended-release\res
+com.uddoktahisab.app-tracing-ktx-1.2.0-31 C:\Users\samur\.gradle\caches\8.14.5\transforms\9cfd4f32e40f49592811cdc36e986b0b\transformed\tracing-ktx-1.2.0\res
+com.uddoktahisab.app-play-services-base-18.0.1-32 C:\Users\samur\.gradle\caches\8.14.5\transforms\a42168c87d48067b48c56f96f2909d92\transformed\play-services-base-18.0.1\res
+com.uddoktahisab.app-lifecycle-livedata-core-ktx-2.8.7-33 C:\Users\samur\.gradle\caches\8.14.5\transforms\a58cc2fd60f2caccc85d2bdda5119cb9\transformed\lifecycle-livedata-core-ktx-2.8.7\res
+com.uddoktahisab.app-animation-release-34 C:\Users\samur\.gradle\caches\8.14.5\transforms\a58fd1b138a1f1f7113c05dda4c58daa\transformed\animation-release\res
+com.uddoktahisab.app-activity-1.10.0-35 C:\Users\samur\.gradle\caches\8.14.5\transforms\b0f33bf314c77c77983b33e2346bcdfc\transformed\activity-1.10.0\res
+com.uddoktahisab.app-startup-runtime-1.1.1-36 C:\Users\samur\.gradle\caches\8.14.5\transforms\b20af98b531b4bbb0773d184a5fb0567\transformed\startup-runtime-1.1.1\res
+com.uddoktahisab.app-animation-core-release-37 C:\Users\samur\.gradle\caches\8.14.5\transforms\b33601626ceb80cab7eabc9e2f1c4dfa\transformed\animation-core-release\res
+com.uddoktahisab.app-tracing-1.2.0-38 C:\Users\samur\.gradle\caches\8.14.5\transforms\b6bcafbb43f8cb2597a0891497f90b0b\transformed\tracing-1.2.0\res
+com.uddoktahisab.app-graphics-path-1.0.1-39 C:\Users\samur\.gradle\caches\8.14.5\transforms\bbf9563b805d79b5da7cd081331b431b\transformed\graphics-path-1.0.1\res
+com.uddoktahisab.app-lifecycle-viewmodel-release-40 C:\Users\samur\.gradle\caches\8.14.5\transforms\c0cf7440442b7a0c15c521308b8721ea\transformed\lifecycle-viewmodel-release\res
+com.uddoktahisab.app-ui-tooling-preview-release-41 C:\Users\samur\.gradle\caches\8.14.5\transforms\c323b3597b22574d549136cfbc83c86d\transformed\ui-tooling-preview-release\res
+com.uddoktahisab.app-lifecycle-livedata-2.8.7-42 C:\Users\samur\.gradle\caches\8.14.5\transforms\c41fdd77d561b60c0e6114a748b61c7b\transformed\lifecycle-livedata-2.8.7\res
+com.uddoktahisab.app-lifecycle-viewmodel-ktx-2.8.7-43 C:\Users\samur\.gradle\caches\8.14.5\transforms\c4eaf44a703141c83d1c627c7fbf934e\transformed\lifecycle-viewmodel-ktx-2.8.7\res
+com.uddoktahisab.app-runtime-saveable-release-44 C:\Users\samur\.gradle\caches\8.14.5\transforms\c72beaaec2418a1a3a077b3026757460\transformed\runtime-saveable-release\res
+com.uddoktahisab.app-navigation-runtime-2.8.5-45 C:\Users\samur\.gradle\caches\8.14.5\transforms\c740aa6e3f7148bb55aa4456081d86c9\transformed\navigation-runtime-2.8.5\res
+com.uddoktahisab.app-emoji2-1.3.0-46 C:\Users\samur\.gradle\caches\8.14.5\transforms\ca19d10f3faff4dabd65d6597aec6fc3\transformed\emoji2-1.3.0\res
+com.uddoktahisab.app-work-runtime-ktx-2.10.0-47 C:\Users\samur\.gradle\caches\8.14.5\transforms\d2fa7ccd15923f36cecc228d8a88ab8f\transformed\work-runtime-ktx-2.10.0\res
+com.uddoktahisab.app-hilt-navigation-compose-1.2.0-48 C:\Users\samur\.gradle\caches\8.14.5\transforms\d3824eaba2420c4f25f9180e2037a6e9\transformed\hilt-navigation-compose-1.2.0\res
+com.uddoktahisab.app-play-services-basement-18.3.0-49 C:\Users\samur\.gradle\caches\8.14.5\transforms\d586af0bc1d1e31f87329a32994ca31d\transformed\play-services-basement-18.3.0\res
+com.uddoktahisab.app-lifecycle-runtime-compose-release-50 C:\Users\samur\.gradle\caches\8.14.5\transforms\d633c97c0fed22748bd26322b0fc4497\transformed\lifecycle-runtime-compose-release\res
+com.uddoktahisab.app-datastore-core-release-51 C:\Users\samur\.gradle\caches\8.14.5\transforms\de26602d34c3a01f795224300ef39dab\transformed\datastore-core-release\res
+com.uddoktahisab.app-material-ripple-release-52 C:\Users\samur\.gradle\caches\8.14.5\transforms\de745a2860b6de2e0a9657d873edbdea\transformed\material-ripple-release\res
+com.uddoktahisab.app-hilt-navigation-1.2.0-53 C:\Users\samur\.gradle\caches\8.14.5\transforms\def36bf753cebf915fbef237be7a8f5f\transformed\hilt-navigation-1.2.0\res
+com.uddoktahisab.app-profileinstaller-1.4.0-54 C:\Users\samur\.gradle\caches\8.14.5\transforms\e2c084cef7b42581d41921616b01dccb\transformed\profileinstaller-1.4.0\res
+com.uddoktahisab.app-activity-ktx-1.10.0-55 C:\Users\samur\.gradle\caches\8.14.5\transforms\e37071eb8e846ae24e871f4538158b51\transformed\activity-ktx-1.10.0\res
+com.uddoktahisab.app-datastore-release-56 C:\Users\samur\.gradle\caches\8.14.5\transforms\ea6f79a4344eeebf9c83b92740375a05\transformed\datastore-release\res
+com.uddoktahisab.app-lifecycle-viewmodel-savedstate-2.8.7-57 C:\Users\samur\.gradle\caches\8.14.5\transforms\eadda291987b8bfea7a7cdb7dacbcebf\transformed\lifecycle-viewmodel-savedstate-2.8.7\res
+com.uddoktahisab.app-lifecycle-viewmodel-compose-release-58 C:\Users\samur\.gradle\caches\8.14.5\transforms\ed942192da6def9bf078f08dfe9bacfb\transformed\lifecycle-viewmodel-compose-release\res
+com.uddoktahisab.app-navigation-common-2.8.5-59 C:\Users\samur\.gradle\caches\8.14.5\transforms\eea08097a758f8e5a98d68c60f19de49\transformed\navigation-common-2.8.5\res
+com.uddoktahisab.app-foundation-layout-release-60 C:\Users\samur\.gradle\caches\8.14.5\transforms\f0b53ad1894750c803aeba2913d7c1a7\transformed\foundation-layout-release\res
+com.uddoktahisab.app-ui-graphics-release-61 C:\Users\samur\.gradle\caches\8.14.5\transforms\f41e5a3c43b198f59846d6feb5646e00\transformed\ui-graphics-release\res
+com.uddoktahisab.app-lifecycle-service-2.8.7-62 C:\Users\samur\.gradle\caches\8.14.5\transforms\f7ef7ddc52fb93018bea849b6318afe7\transformed\lifecycle-service-2.8.7\res
+com.uddoktahisab.app-lifecycle-livedata-core-2.8.7-63 C:\Users\samur\.gradle\caches\8.14.5\transforms\f914b445a908b50f25ef665504e87a51\transformed\lifecycle-livedata-core-2.8.7\res
+com.uddoktahisab.app-room-runtime-2.6.1-64 C:\Users\samur\.gradle\caches\8.14.5\transforms\faea39f1b33a13d3a2e68a86909a5857\transformed\room-runtime-2.6.1\res
+com.uddoktahisab.app-ui-geometry-release-65 C:\Users\samur\.gradle\caches\8.14.5\transforms\fc24bd718e2a4eeadda79b1595d17a71\transformed\ui-geometry-release\res
+com.uddoktahisab.app-pngs-66 D:\OWN Product\Uddokta\app\build\generated\res\pngs\release
+com.uddoktahisab.app-res-67 D:\OWN Product\Uddokta\app\build\generated\res\processReleaseGoogleServices
+com.uddoktahisab.app-resValues-68 D:\OWN Product\Uddokta\app\build\generated\res\resValues\release
+com.uddoktahisab.app-packageReleaseResources-69 D:\OWN Product\Uddokta\app\build\intermediates\incremental\release\packageReleaseResources\merged.dir
+com.uddoktahisab.app-packageReleaseResources-70 D:\OWN Product\Uddokta\app\build\intermediates\incremental\release\packageReleaseResources\stripped.dir
+com.uddoktahisab.app-release-71 D:\OWN Product\Uddokta\app\build\intermediates\merged_res\release\mergeReleaseResources
+com.uddoktahisab.app-main-72 D:\OWN Product\Uddokta\app\src\main\res
+com.uddoktahisab.app-release-73 D:\OWN Product\Uddokta\app\src\release\res

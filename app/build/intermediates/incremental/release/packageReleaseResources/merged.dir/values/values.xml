@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">উদ্যোক্তা হিসাব</string>
+    <string name="gcm_defaultSenderId" translatable="false">965984539888</string>
+    <string name="google_api_key" translatable="false">AIzaSyBLri_ykHwV0IyofbvOilSzoVOOy5hXCP0</string>
+    <string name="google_app_id" translatable="false">1:965984539888:android:e4cf97e3a1a717c4c2de35</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyBLri_ykHwV0IyofbvOilSzoVOOy5hXCP0</string>
+    <string name="google_storage_bucket" translatable="false">uddokta-2d692.firebasestorage.app</string>
+    <string name="project_id" translatable="false">uddokta-2d692</string>
+    <style name="Theme.UddoktaHisab" parent="android:style/Theme.Material.Light.NoActionBar"><item name="android:fontFamily">sans</item><item name="android:windowLightStatusBar">true</item><item name="android:statusBarColor">#F7F8F3</item><item name="android:navigationBarColor">#F7F8F3</item></style>
+</resources>
